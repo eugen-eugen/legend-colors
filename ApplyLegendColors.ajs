@@ -145,10 +145,16 @@ console.log("\nCollected colors for " + colorCount + " element(s)");
 if (colorCount === 0) {
   console.log("No elements with fill colors found on legend views. Exiting.");
 } else {
-  // Now apply these colors to all views (including legend views)
+  // Now apply these colors to all non-legend views
   var appliedCount = 0;
 
   $("view").each(function (view) {
+    // Skip legend views - they should keep their original colors
+    if (view.prop("legend") === "y") {
+      console.log("Skipping legend view: " + view.name);
+      return;
+    }
+
     $(view)
       .find("element")
       .each(function (visualElement) {
@@ -164,7 +170,7 @@ if (colorCount === 0) {
   console.log(
     "\nApplied colors to " +
       appliedCount +
-      " visual element(s) across all views",
+      " visual element(s) across non-legend views",
   );
   console.log("Done!");
 }
