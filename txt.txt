@@ -1,0 +1,555 @@
+Starting Apply Legend Colors script...
+Found 1 legend view(s)
+Processing legend view: Legende
+  - Stored color #ff80c0 for element: SI2
+    -> Related (aggregation-relationship): SI2
+    -> Related (composition-relationship): AsylKon-Geschäftsanwendung
+        -> Related (composition-relationship): Bereitstellung-Analyse
+        -> Related (composition-relationship): Fachliche_Administration
+        -> Related (composition-relationship): Fristenkontrolle
+        -> Related (composition-relationship): Konsultation
+        -> Related (composition-relationship): Nachrichtenverwaltung
+        -> Related (composition-relationship): Protokollierung
+        -> Related (composition-relationship): Vorgangsverwaltung
+        -> Related (composition-relationship): Technische_Administration
+        -> Related (composition-relationship): ZB-Kommunkation
+        <- Related (composition-relationship): Geschäftsanwendung
+            -> Related (composition-relationship): AZR-Analyse
+                -> Related (composition-relationship): Berichtswesen
+                -> Related (composition-relationship): Datenabgleich_ABH
+                -> Related (composition-relationship): Datenexport
+                -> Related (composition-relationship): Datenpflege
+                -> Related (composition-relationship): Datenübernahme_Querschnitt
+                -> Related (composition-relationship): Datenübernahme_Register-AZR
+            -> Related (composition-relationship): AZR-Portal
+                -> Related (composition-relationship): AZR-Auskunft
+                -> Related (composition-relationship): AZR-Meldung
+                -> Related (composition-relationship): Mitteilungen
+                -> Related (composition-relationship): Schemaauskunft
+            -> Related (composition-relationship): BA-Beteiligung-Geschäftsanwendung
+                -> Related (composition-relationship): Bereitstellung-Analyse
+                -> Related (composition-relationship): Beteiligung
+                -> Related (composition-relationship): Fachliche_Administration
+                -> Related (composition-relationship): Fristenkontrolle
+                -> Related (composition-relationship): Protokollierung
+            -> Related (composition-relationship): EMA-Geschäftsanwendung
+                -> Related (composition-relationship): MB-Meldung
+                -> Related (composition-relationship): Protokollierng
+                <- Related (composition-relationship): SI5
+                    -> Related (composition-relationship): ISA-Geschäftsanwendung
+                        -> Related (composition-relationship): Auskunft
+                        -> Related (composition-relationship): AZR-Meldung
+                        -> Related (composition-relationship): Dublettenbereinigung
+                    -> Related (composition-relationship): RegI-Geschäftsanwendung
+                        -> Related (composition-relationship): Abgleiche
+                        -> Related (composition-relationship): AFIS-FABL-Abruf
+                        -> Related (composition-relationship): Anbindung_BKA_Residence
+                        -> Related (composition-relationship): Anbindung_Register_AZR
+                        -> Related (composition-relationship): Ankunftsnachweis
+                        -> Related (composition-relationship): Asyl-Online
+                        -> Related (composition-relationship): Auskunft
+                        -> Related (composition-relationship): AZR-Abgleich
+                        -> Related (composition-relationship): BKA-Bestandsbildung
+                        -> Related (composition-relationship): Erstregistrierung
+                        -> Related (composition-relationship): Fast-ID
+                        -> Related (composition-relationship): Fristenkontrolle
+                        -> Related (composition-relationship): Geschäftsstatistik
+                        -> Related (composition-relationship): GSAT-Management
+                        -> Related (composition-relationship): INPOL-SF-Abgleich
+                        -> Related (composition-relationship): Nachrichtenverwaltung
+                        -> Related (composition-relationship): Prozesssteuerung
+                        -> Related (composition-relationship): Prozesssuche
+                        -> Related (composition-relationship): Polizeiregistrierung
+                        -> Related (composition-relationship): VIS-Abgleich
+                        -> Related (composition-relationship): Visadatei-Abgleich
+                        -> Related (composition-relationship): Vorgangsverwaltung
+                        -> Related (composition-relationship): Protokollierung
+                        -> Related (composition-relationship): Fingerabdruckmeldung
+                        -> Related (composition-relationship): regi-gk
+                        -> Related (composition-relationship): regi-gkgui
+                    -> Related (composition-relationship): Verfügungstextanwendung
+                        -> Related (composition-relationship): Bearbeitung
+                        -> Related (composition-relationship): Eingang
+                        -> Related (composition-relationship): Fristenkontrolle
+                        -> Related (composition-relationship): Protokollierung
+                        -> Related (composition-relationship): Statistik
+                        -> Related (composition-relationship): Verwaltung
+                    -> Related (composition-relationship): Visa-Geschäftsanwendung
+                        -> Related (composition-relationship): Auskunft VIS
+                        -> Related (composition-relationship): Auskunft Visadatei
+                        -> Related (composition-relationship): Auskunft VIS/Visadatei
+                        -> Related (composition-relationship): Auskunft EES
+                        -> Related (composition-relationship): Meldung
+                        -> Related (composition-relationship): AV_Scanner
+                        -> Related (composition-relationship): visa-gk
+                        -> Related (composition-relationship): visa-gkgui
+                        <- Related (composition-relationship): Geschäftsanwendung
+                            -> Related (composition-relationship): Visa-ABH-Beteiligung Geschäftsanwendung
+                                -> Related (composition-relationship): Beteiligung
+                                -> Related (composition-relationship): Fachliche_Administration
+                                -> Related (composition-relationship): Fristenkontrolle
+                                -> Related (composition-relationship): Bereitstellung-Analyse
+                            -> Related (composition-relationship): Visa-Analyse
+                                -> Related (composition-relationship): Berichtswesen
+                                -> Related (composition-relationship): Datenexport
+                                -> Related (composition-relationship): Datenpflege
+                                -> Related (composition-relationship): Datenübernahme_Querschnitt
+                                -> Related (composition-relationship): Datenübernahme_Register_Visa-Datei
+                            -> Related (composition-relationship): Visa-BfV-Beteiligung Geschäftsanwendung
+                                -> Related (composition-relationship): Beteiligung
+                                -> Related (composition-relationship): Fachliche_Administration
+                                -> Related (composition-relationship): Fristenkontrolle
+                            -> Related (composition-relationship): VIS-Admin
+                                -> Related (composition-relationship): Auswertung_VIS
+                                -> Related (composition-relationship): Mitteilungen_VIS
+                                -> Related (composition-relationship): Pflege_VIS
+                                <- Related (composition-relationship): SI6
+                                    -> Related (composition-relationship): VIS-IS
+                                        -> Related (composition-relationship): Fristenkontrolle
+                                        -> Related (composition-relationship): VIS_Auskunft
+                                        -> Related (composition-relationship): Zugangsantrag
+                                        -> Related (composition-relationship): Zugriffsprotokoll
+                                    -> Related (composition-relationship): NVIS
+                                        -> Related (composition-relationship): Auskunft
+                                        -> Related (composition-relationship): Bereitstellung_Analyse
+                                        -> Related (composition-relationship): Fristenkontrolle
+                                        -> Related (composition-relationship): Meldung
+                                        -> Related (composition-relationship): Protokollierung
+                                        -> Related (composition-relationship): Verlinkungsnachricht
+                                        <- Related (composition-relationship): Register
+                                            -> Related (composition-relationship): Register Visadatei
+                                                -> Related (composition-relationship): Visa-Auskunft
+                                                -> Related (composition-relationship): Visa-Bereitstellung-Analyse
+                                                -> Related (composition-relationship): Visa-Datenpflege
+                                                -> Related (composition-relationship): Visa-Fristenkontrolle
+                                                -> Related (composition-relationship): Visa-Meldung
+                                                -> Related (composition-relationship): Visa-Protokollierung
+                                            -> Related (composition-relationship): Register VWD
+                                                -> Related (composition-relationship): Auskunft_Register
+                                                -> Related (composition-relationship): Bereitstellung_Analyse_Register
+                                                -> Related (composition-relationship): Datenpflege_Register
+                                                -> Related (composition-relationship): Fristenkontrolle_Register
+                                                -> Related (composition-relationship): Meldung_Register
+                                                -> Related (composition-relationship): Protokollierung_Register
+                                            <- Related (composition-relationship): Visa
+                                    -> Related (composition-relationship): EES-GA
+                                        -> Related (composition-relationship): Auskunft
+                                        -> Related (composition-relationship): Meldung
+                                        -> Related (composition-relationship): Bildverarbeitung
+                                        -> Related (composition-relationship): Protokollierung
+                                        -> Related (composition-relationship): Statistik
+                                        -> Related (composition-relationship): Druckansicht
+                                        <- Related (composition-relationship): Geschäftsanwendung
+                                            -> Related (composition-relationship): EU-LOA-GK
+                                                -> Related (composition-relationship): Auskunft
+                                                -> Related (composition-relationship): Meldung
+                                                -> Related (composition-relationship): Statistik
+                                                -> Related (composition-relationship): VIS
+                                            -> Related (composition-relationship): NUI-Connector
+                                                -> Related (composition-relationship): Ablaufsteuerung
+                                                -> Related (composition-relationship): EES-Adapter
+                                                -> Related (composition-relationship): ETIAS-Adapter
+                                                -> Related (composition-relationship): NUI_SGW_Adapter
+                                            -> Related (composition-relationship): IntegrIS
+                                                -> Related (composition-relationship): Sammelantragsverwaltung
+                                                -> Related (composition-relationship): Auskunft
+                                                -> Related (composition-relationship): Fristenkontrolle
+                                                -> Related (composition-relationship): Outputmanagement
+                                                -> Related (composition-relationship): Protokollierung
+                                                -> Related (composition-relationship): Konvertierung
+                                                -> Related (composition-relationship): Statistik
+                                                -> Related (composition-relationship): integris-gk
+                                                -> Related (composition-relationship): integris-gkgui
+                                            <- Related (composition-relationship): ZEUS
+                                                -> Related (composition-relationship): Register
+                                    -> Related (composition-relationship): VIS-Mail
+                                        -> Related (composition-relationship): Fristenkontrolle
+                                        -> Related (composition-relationship): Kommunikation
+                                        -> Related (composition-relationship): Nachrichtenverwaltung
+                                        -> Related (composition-relationship): Protokollierung
+                                    -> Related (composition-relationship): SIS-Geschäftsanwendung
+                                        -> Related (composition-relationship): Auskunft
+                                        -> Related (composition-relationship): Meldung
+                                        -> Related (composition-relationship): Mitteilung
+                                        -> Related (composition-relationship): AZR-Kommunikation
+                                        -> Related (composition-relationship): sys-gk
+                                        -> Related (composition-relationship): sys-gkgui
+                                        <- Related (composition-relationship): Register
+                                            -> Related (composition-relationship): Register AZR
+                                                -> Related (composition-relationship): AZR-Auskunft
+                                                -> Related (composition-relationship): AZR-Bestandsverwaltung
+                                                -> Related (composition-relationship): AZR-Datenpflege
+                                                -> Related (composition-relationship): AZR-Fristenkontrolle
+                                                -> Related (composition-relationship): AZR-Konfiguration
+                                                -> Related (composition-relationship): AZR-Meldung
+                                                -> Related (composition-relationship): AZR-Bestandsabgleich
+                                                -> Related (composition-relationship): AZR-Bereitstellung-Analyse
+                                                -> Related (composition-relationship): AZR-Mitteilungen
+                                                -> Related (composition-relationship): AZR-MGW
+                                                -> Related (composition-relationship): AZR-Protokollierung
+                                            -> Related (composition-relationship): Register ISAD
+                                                -> Related (composition-relationship): ISAD-Auskunft
+                                                -> Related (composition-relationship): ISAD-Bereitstellung-Analyse
+                                                -> Related (composition-relationship): ISAD-Meldung
+                                            -> Related (composition-relationship): Register SIS-OS
+                                                -> Related (composition-relationship): SIS-OS-Auskunft
+                                                -> Related (composition-relationship): SIS-OS-Datenpflege
+                                                -> Related (composition-relationship): SIS-OS-Geschäftsstatistik
+                                                -> Related (composition-relationship): SIS-OS-Meldung
+                                                -> Related (composition-relationship): SIS-OS-Protokollierung
+                                            -> Related (composition-relationship): SIS Register
+                                                -> Related (composition-relationship): Auskunft
+                                                -> Related (composition-relationship): Meldung
+                                                -> Related (composition-relationship): Mitteilung
+                                                -> Related (composition-relationship): Geschäftsstatistik
+                                                -> Related (composition-relationship): Protokollierung
+                                            <- Related (composition-relationship): AZR
+                                    -> Related (composition-relationship): SISKOM-Geschäftsanwendung
+                                        -> Related (composition-relationship): syscom-gk
+                                        -> Related (composition-relationship): syscom-gkgui
+                                    -> Related (composition-relationship): VIS-Geschäftsanwendung
+                                        -> Related (composition-relationship): vis-gk
+                                        -> Related (composition-relationship): vis-gkgui
+                            -> Related (composition-relationship): Visa-Konsultationsverfahren
+                                -> Related (composition-relationship): Bereitstellung-Analyse
+                                -> Related (composition-relationship): Fachliche_Administration
+                                -> Related (composition-relationship): FD-Konsultation
+                                -> Related (composition-relationship): Fristenkontrolle
+                                -> Related (composition-relationship): Kommunikation_ViVe
+                                -> Related (composition-relationship): Nachrichtenverwaltung
+                                -> Related (composition-relationship): Protokollierung
+                                -> Related (composition-relationship): Prozesssteuerung
+                                -> Related (composition-relationship): SP-Konsultation
+                                -> Related (composition-relationship): vikon-gkgui
+                                <- Related (composition-relationship): SI4
+                                    -> Related (composition-relationship): Fundpapier-Verfahren
+                                        -> Related (composition-relationship): Vorgangsverwaltung
+                                        -> Related (composition-relationship): AZR-Abgleich
+                                        -> Related (composition-relationship): Auswärtige-Auswertung
+                                        -> Related (composition-relationship): Fachliche-Administration
+                                        -> Related (composition-relationship): Bereitstellung-Analyse
+                                        -> Related (composition-relationship): Protokollierung
+                                        -> Related (composition-relationship): Fristenkontrolle
+                                        -> Related (composition-relationship): fundpapier-gk
+                                        -> Related (composition-relationship): fundpapier-gkui
+                                        <- Related (composition-relationship): Geschäftsanwendung
+                                            <- Related (composition-relationship): Fundpapier
+                                                -> Related (composition-relationship): Register
+                            -> Related (composition-relationship): Visa-OEBH-Beteiligung-Geschäftsanwendung
+                                -> Related (composition-relationship): Beteiligung
+                                -> Related (composition-relationship): Fachliche_Administration
+                                -> Related (composition-relationship): Fristenkontrolle
+                                -> Related (composition-relationship): Bereitstellung-Analyse
+                            -> Related (composition-relationship): Visa-Portal
+                                -> Related (composition-relationship): Visa-Auskunft
+                                -> Related (composition-relationship): Visa-Meldung
+                            -> Related (composition-relationship): Visa-Verfahren
+                                -> Related (composition-relationship): ABH-Beteiligung
+                                -> Related (composition-relationship): AZR/SIS/VWD-Trefferbewertung
+                                -> Related (composition-relationship): AZR-Abgleich
+                                -> Related (composition-relationship): BA-Beteiligung
+                                -> Related (composition-relationship): Bereitstellung_Analyse
+                                -> Related (composition-relationship): BfV-Beteiligung
+                                -> Related (composition-relationship): DAV-Abgleich
+                                -> Related (composition-relationship): fachliche_Administration
+                                -> Related (composition-relationship): FAP-Beteiligung
+                                -> Related (composition-relationship): Fristenkontrolle
+                                -> Related (composition-relationship): Identitätsprüfung
+                                -> Related (composition-relationship): ISAD_Abgleich
+                                -> Related (composition-relationship): Kommunikation_AA
+                                -> Related (composition-relationship): Nachrichtenverwaltung
+                                -> Related (composition-relationship): OEBH-Beteiligung
+                                -> Related (composition-relationship): Protokollierung
+                                -> Related (composition-relationship): Prozesssteuerung
+                                -> Related (composition-relationship): SIS-Abgleich
+                                -> Related (composition-relationship): SIS-SF_Abgleich
+                                -> Related (composition-relationship): Verwaltung_VIS
+                                -> Related (composition-relationship): Verwaltung_Visa-Datei
+                                -> Related (composition-relationship): ViKon-Beteiligung
+                                -> Related (composition-relationship): Visa-Ortsbuch
+                                -> Related (composition-relationship): VWD-Abgleich
+                                -> Related (composition-relationship): EES-Abgleich
+                                -> Related (composition-relationship): ViVe-Binärdatenaustausch
+                            -> Related (composition-relationship): VWD-Geschäftsanwendung
+                                -> Related (composition-relationship): Auskunft_GA
+                                -> Related (composition-relationship): Datenpflege_GA
+                                -> Related (composition-relationship): Meldung_GA
+                    -> Related (composition-relationship): SIS-Register
+                    -> Related (composition-relationship): RegiWeb-Geschäftsanwendung
+                        -> Related (composition-relationship): regiweb-gk
+                        -> Related (composition-relationship): regiweb-gkgui
+            -> Related (composition-relationship): ISAD-Analyse
+                -> Related (composition-relationship): Datenübernahme_Register-ISAD
+                -> Related (composition-relationship): Datenpflege
+                -> Related (composition-relationship): Berichtswesen
+            -> Related (composition-relationship): SBH-Beteiligung
+                -> Related (composition-relationship): Bereitstellung Analyse
+                -> Related (composition-relationship): Datenpflege
+                -> Related (composition-relationship): Fristenkontrolle
+                -> Related (composition-relationship): SBH-Beteiligung
+                -> Related (composition-relationship): Schlüsselkatalog
+            -> Related (composition-relationship): Sirene
+                -> Related (composition-relationship): Mitteilungen
+            -> Related (composition-relationship): SIS-OS-Analyse
+                -> Related (composition-relationship): Datenübernahme_Register-SIS-OS
+                -> Related (composition-relationship): Datenpflege
+                -> Related (composition-relationship): Berichtswesen
+  - Stored color #c9c9c9 for element: Externe Systeme
+    -> Related (composition-relationship): Anwendungssystem_CVIS
+    -> Related (composition-relationship): Anwendungssystem Artus
+    -> Related (composition-relationship): Anwendungssystem BSI
+    -> Related (composition-relationship): Anwendungssystem der ABH
+    -> Related (composition-relationship): Anwendungssystem der BA
+    -> Related (composition-relationship): Anwendungssystem der Bundesdruckerei
+    -> Related (composition-relationship): Anwendungssystem der Bundespolizei
+    -> Related (composition-relationship): Anwendungssystem der Meldebehörden
+    -> Related (composition-relationship): Anwendungssystem der örtlichen Waffenbehörden
+    -> Related (composition-relationship): Anwendungssystem der SBH für SBH-Beteiligung
+    -> Related (composition-relationship): Anwendungssystem der SBH zur Strafverfolgung
+    -> Related (composition-relationship): Anwendungssystem der Staatsangehörigkeitsbehörden
+    -> Related (composition-relationship): Anwendungssystem des Auswärtigen Amtes
+    -> Related (composition-relationship): Anwendungssystem des BAMF
+    -> Related (composition-relationship): Anwendungssystem des BKA
+    -> Related (composition-relationship): Anwendungssystem einer Auslandsvertretung
+    -> Related (composition-relationship): Anwendungssystem einer VWD nutzenden Behörde
+    -> Related (composition-relationship): Anwendungssystem eines AsylKon-Fachdienstes
+    -> Related (composition-relationship): Anwendungssystem eines Bundeslands
+    -> Related (composition-relationship): Anwendungssystem eines Schengenpartners
+    -> Related (composition-relationship): Anwendungssystem eines Schengenpartners in ViKon
+    -> Related (composition-relationship): Anwendungssystem eines Vikon-Fachdienstes
+    -> Related (composition-relationship): Anwendungssystem erstregistrierender Behörden
+    -> Related (composition-relationship): Anwendungssystem NUI von EU-LISA
+    -> Related (composition-relationship): PNR-Vorgangsverwaltung
+    -> Related (composition-relationship): RK-Portal des AA
+    -> Related (composition-relationship): VIS-Mail-Zentral
+    -> Related (composition-relationship): XPS3
+  - Stored color #ff8040 for element: SI3
+    -> Related (composition-relationship): BC Kontrollakte
+        -> Related (composition-relationship): Administration
+        -> Related (composition-relationship): Bereitstellung-Analyse
+        -> Related (composition-relationship): Biometrie
+            -> Related (composition-relationship): Gesichtsbiometrie
+            -> Related (composition-relationship): Lichtbildqualität
+            -> Related (composition-relationship): Qualitätsanalyse
+            <- Related (composition-relationship): Querschnittskomponente
+                -> Related (composition-relationship): Behördenverzeichnis
+                    -> Related (composition-relationship): Batchverarbeitung
+                    -> Related (composition-relationship): Behördengruppenverwaltung
+                    -> Related (composition-relationship): Behördensuche
+                    -> Related (composition-relationship): Behördenverwaltung
+                -> Related (composition-relationship): Benutzerverzeichnis
+                    -> Related (composition-relationship): Benutzerverwaltung
+                    -> Related (composition-relationship): Berechtigungsdatenverwaltung
+                -> Related (composition-relationship): Data Quality Instance
+                    -> Related (composition-relationship): ACO_data_reception
+                    -> Related (composition-relationship): Domain Asyl
+                    -> Related (composition-relationship): Domain VIS
+                    -> Related (composition-relationship): Domäne-BCP
+                    -> Related (composition-relationship): Domäne-ASV
+                    -> Related (composition-relationship): Domäne-BCMW
+                -> Related (composition-relationship): DQI-Reporting-Portal
+                    -> Related (composition-relationship): Reporting
+                    -> Related (composition-relationship): CSVExport
+                -> Related (composition-relationship): DQI-Scheduler
+                    -> Related (composition-relationship): Logging
+                    -> Related (composition-relationship): Scheduling
+                -> Related (composition-relationship): Output Management
+                    -> Related (composition-relationship): Generierung
+                    -> Related (composition-relationship): Konvertierung
+                    -> Related (composition-relationship): Versand
+                -> Related (composition-relationship): Portal (-startseite)
+                    -> Related (composition-relationship): Portal
+                    -> Related (composition-relationship): Nachrichtenmanagement
+                -> Related (composition-relationship): Protokollrecherche
+                    -> Related (composition-relationship): Client_Protokollpflege
+                    -> Related (composition-relationship): Client_Protokollsuche
+                    -> Related (composition-relationship): Protokollpflege
+                    -> Related (composition-relationship): Protokollsuche
+                -> Related (composition-relationship): QK ASV NWR
+                    -> Related (composition-relationship): Suchdatenpflege
+                    -> Related (composition-relationship): Suche
+                -> Related (composition-relationship): Bioanalyse
+                    -> Related (composition-relationship): Biometrische_Daten_analysieren
+                -> Related (composition-relationship): QS Antivirenscanner
+                    -> Related (composition-relationship): Virenscan
+                -> Related (composition-relationship): QS ASV AZR/Visa/Esta
+                    -> Related (composition-relationship): Suchdatenpflege
+                    -> Related (composition-relationship): Suche
+                    -> Related (composition-relationship): Trefferbewertung
+                    -> Related (composition-relationship): Dublettenabfrage
+                -> Related (composition-relationship): QS ASV VWD
+                    -> Related (composition-relationship): Suchdatenpflege
+                    -> Related (composition-relationship): Suche
+                -> Related (composition-relationship): QS Geoservice
+                    -> Related (composition-relationship): Geokodierungsanfrage
+                -> Related (composition-relationship): Querschnitt
+                    -> Related (composition-relationship): Anwenderverwaltung
+                    -> Related (composition-relationship): Arbeitshilfen
+                    -> Related (composition-relationship): Behördensuche
+                    -> Related (composition-relationship): Digitalisierung
+                    -> Related (composition-relationship): Ortsbuch
+                    -> Related (composition-relationship): PDF-Konvertierung
+                    -> Related (composition-relationship): Schrifterkennung
+                    -> Related (composition-relationship): Sekundärdatenverwaltung
+                    -> Related (composition-relationship): Tertiärdatenverwaltung
+                    -> Related (composition-relationship): Verwaltung_der_Arbeitshilfen
+                    -> Related (composition-relationship): Verwaltung_der_Hilfe
+                    -> Related (composition-relationship): Verwaltung_der_Kundendatenbank
+                    <- Related (composition-relationship): EStA-Geschäftsanwendung
+                        -> Related (composition-relationship): Adressen
+                        -> Related (composition-relationship): Auskunft
+                        -> Related (composition-relationship): Externes_System
+                        -> Related (composition-relationship): Meldung
+                        -> Related (composition-relationship): Meldungsbeleg
+                        -> Related (composition-relationship): Sachverhaltstypen
+                        -> Related (composition-relationship): Schriftwechsel
+                        -> Related (composition-relationship): Splitten
+                        -> Related (composition-relationship): Statistik
+                        -> Related (composition-relationship): Zusammenführen
+                        <- Related (composition-relationship): Geschäftsanwendung
+                            -> Related (composition-relationship): AAV-Geschäftsanwendung
+                                -> Related (composition-relationship): Auskunft
+                                -> Related (composition-relationship): Meldung
+                                -> Related (composition-relationship): Schreibenerzeugung
+                                -> Related (composition-relationship): Verteilquoten
+                                <- Related (composition-relationship): TSII1
+                                    -> Related (composition-relationship): EStA-Dokumenterzeugung
+                                    -> Related (composition-relationship): FaStA-Geschäftsanwendung
+                                        -> Related (composition-relationship): Auskunft
+                                        -> Related (composition-relationship): Meldung
+                                    -> Related (composition-relationship): STADA-Geschäftsanwendung
+                                        -> Related (composition-relationship): Auskunft
+                                    -> Related (composition-relationship): Register AAV
+                                        -> Related (composition-relationship): Auskunft
+                                        -> Related (composition-relationship): Exporter
+                                        -> Related (composition-relationship): Importer
+                                        -> Related (composition-relationship): Meldung
+                                        -> Related (composition-relationship): Statistik
+                                        -> Related (composition-relationship): Verteilquoten
+                                        <- Related (composition-relationship): Register
+                                            -> Related (composition-relationship): Register EStA
+                                                -> Related (composition-relationship): Auskunft
+                                                -> Related (composition-relationship): Meldung
+                                                -> Related (composition-relationship): Splitten
+                                                -> Related (composition-relationship): Zusammenführen
+                                            -> Related (composition-relationship): Register FaStA
+                                                -> Related (composition-relationship): Auskunft
+                                                -> Related (composition-relationship): Meldung
+                                            -> Related (composition-relationship): Register STADA
+                                                -> Related (composition-relationship): Auskunft
+                                            <- Related (composition-relationship): FAStA
+                            -> Related (composition-relationship): EStA-Hilfe
+                                -> Related (composition-relationship): Externes_System
+                                -> Related (composition-relationship): Hilfe_anzeigen
+                -> Related (composition-relationship): Schlüsselverzeichnis
+                    -> Related (composition-relationship): Schlüsselverzeichnis
+                    -> Related (composition-relationship): Staatenverzeichnis
+                -> Related (composition-relationship): XÖV-Schlüsselverzeichnis
+                    -> Related (composition-relationship): Schlüsselverzeichnis
+                -> Related (composition-relationship): IAM
+                    -> Related (composition-relationship): IAM
+                -> Related (composition-relationship): ESTA.Dokumentenerzeugung
+                -> Related (composition-relationship): MItteilungsservice
+                <- Related (composition-relationship): QK
+        -> Related (composition-relationship): BPOL-Anfrageverwaltung
+        -> Related (composition-relationship): Dienststellenkatalog
+        -> Related (composition-relationship): Druckansichtverwaltung
+        -> Related (composition-relationship): Fristenkontrolle
+        -> Related (composition-relationship): Mailversandverwaltung
+        -> Related (composition-relationship): Protokollierung
+        -> Related (composition-relationship): Verwaltung_Artus
+        -> Related (composition-relationship): Verwaltung_AZR
+        -> Related (composition-relationship): Verwaltung_BCP
+        -> Related (composition-relationship): Verwaltung_BPOL
+        -> Related (composition-relationship): Verwaltung_BSI
+        -> Related (composition-relationship): Verwaltung_INPOL
+        -> Related (composition-relationship): Verwaltung_VIS
+        -> Related (composition-relationship): Verwaltung_VIS_Visa
+        -> Related (composition-relationship): Verwaltung_Visadatei
+        -> Related (composition-relationship): Vorgangsverwaltung
+        -> Related (composition-relationship): Verwaltung_EES
+        -> Related (composition-relationship): Verwaltung_GUI-Auskunft
+        -> Related (composition-relationship): GUI-Verwaltung
+        -> Related (composition-relationship): Verwaltung_NBMS
+        -> Related (composition-relationship): Verwaltung_RTP
+        -> Related (composition-relationship): BCK-EES-GK Vorgangsverwaltung
+        -> Related (composition-relationship): BCK-EES-GK Prozesssteuerung
+        -> Related (composition-relationship): BCK-EES-GK Relevanzprüfung
+        -> Related (composition-relationship): BCK-EES-GK Fachdatenverwaltung
+        -> Related (composition-relationship): BCK-EES-GK Anbindung_EES
+        -> Related (composition-relationship): BCK-EES-GK Anbindung_BPOL
+        -> Related (composition-relationship): BCK-EES-GK Anbindung_TR_Log_GK
+        -> Related (composition-relationship): BCK-TRLog-GK Anbindung_BCK
+        -> Related (composition-relationship): BCK-TRLog-GK Vorgangsverwaltung
+        -> Related (composition-relationship): BCK-TRLog-GK TR-Log_Verwaltung
+        -> Related (composition-relationship): BCK-TRLog-GK Verwaltung_BSI
+        -> Related (composition-relationship): BCK-TRLog-GK Verwaltung_BVA
+        -> Related (composition-relationship): BCK-TRLog-GK Fristenkontrolle
+        -> Related (composition-relationship): kontrollakte-ees-gk
+        -> Related (composition-relationship): kontrollakte-gk
+        -> Related (composition-relationship): kontrollakte-gkgui
+        <- Related (composition-relationship): Geschäftsanwendung
+            -> Related (composition-relationship): BC-Passagierakte
+                -> Related (composition-relationship): Bereitstellung-Analyse
+                -> Related (composition-relationship): Fristenkontrolle
+                -> Related (composition-relationship): Grenzkontrollverwaltung
+                -> Related (composition-relationship): Passagieraktenverwaltung
+                -> Related (composition-relationship): Protokollierung
+                -> Related (composition-relationship): Prozessverwaltung
+                -> Related (composition-relationship): Registerabgleiche
+                -> Related (composition-relationship): AV-Scanner
+                -> Related (composition-relationship): passagierakte-gk
+                -> Related (composition-relationship): passagierakte-gkgui
+                -> Related (composition-relationship): passagierakte-suche-gk
+            -> Related (composition-relationship): BC-Registered Traveler Program
+                -> Related (composition-relationship): Datensatzverwaltung_RTP
+                -> Related (composition-relationship): Datensatzverwaltung_GE
+                -> Related (composition-relationship): Geschäftstatistik
+                -> Related (composition-relationship): Protokollierung
+            <- Related (composition-relationship): BCMW
+                -> Related (composition-relationship): Register
+  - Stored color #f0f080 for element: NWR
+    -> Related (composition-relationship): NWR-Geschäftsanwendung
+        -> Related (composition-relationship): PWR_Auskunft
+        -> Related (composition-relationship): PWR_Bereitstellungs-Analyse
+        -> Related (composition-relationship): PWR_Pflegeoberflaeche
+        <- Related (composition-relationship): Geschäftsanwendung
+            -> Related (composition-relationship): NWR-Hilfe
+                -> Related (composition-relationship): TODO
+            -> Related (composition-relationship): NWR-Statistik
+                -> Related (composition-relationship): TODO
+            <- Related (composition-relationship): NWR
+                -> Related (composition-relationship): Register
+                    -> Related (composition-relationship): Register NWR
+                        -> Related (composition-relationship): ZWR_Auskunft
+                        -> Related (composition-relationship): ZWR_Bereitstellungs-Analyse
+                        -> Related (composition-relationship): ZWR_Fristenkontrolle
+                        -> Related (composition-relationship): ZWR_Meldung
+                        -> Related (composition-relationship): ZWR_Mitteilungen
+                        -> Related (composition-relationship): ZWR_Protokollierung
+  - Stored color #77ffff for element: SI1
+  - Stored color #d4fb78 for element: DI6
+    -> Related (composition-relationship): VfB-Geschäftsanwendung
+        -> Related (composition-relationship): Anträge
+        -> Related (composition-relationship): vfb-gk
+        -> Related (composition-relationship): vfb-gkgui
+        <- Related (composition-relationship): Geschäftsanwendung
+            <- Related (composition-relationship): VfB
+                -> Related (composition-relationship): Register
+    -> Related (composition-relationship): Globaler Sperrdients
+        -> Related (composition-relationship): Sperrdatenverwaltung
+        -> Related (composition-relationship): Listenabruf
+        -> Related (composition-relationship): Sperrlistenerzeugung
+        -> Related (composition-relationship): Bereinigung
+        -> Related (composition-relationship): Statistik
+        -> Related (composition-relationship): Auditierung
+        -> Related (composition-relationship): gsd-gk
+        <- Related (composition-relationship): Geschäftsanwendung
+            <- Related (composition-relationship): GSD
+                -> Related (composition-relationship): Register
+
+Collected colors for 546 element(s)
+Skipping legend view: Legende
+
+Applied colors to 1164 visual element(s) across non-legend views
+Done!

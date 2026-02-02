@@ -1,20 +1,20 @@
 /*
  * Apply Legend Colors to Elements
  *
- * This script finds all views with property "legend"="y" and applies the fill colors
+ * This script finds all views with property "legend"="y" and applies the fill, text, line, and icon colors
  * of elements on these legend views to the same elements on all other views.
  *
- * Additionally, it applies colors to elements that are aggregated, composed, or associated
- * with the legend elements.
+ * Additionally, it applies colors to parts of aggregated/composed elements (top-down)
+ * and to associated elements (outgoing only) with the legend elements.
  *
- * If an element appears on multiple legend views, the color from the first legend view is used.
+ * If an element appears on multiple legend views, the colors from the first legend view are used.
  *
  * (c) Y. Moldawski
  */
 
 console.log("Starting Apply Legend Colors script...");
 
-// Store element colors from legend views: elementId -> fillColor
+// Store element colors from legend views: elementId -> {fillColor, fontColor, lineColor, iconColor}
 var elementColors = {};
 
 // Find all views with property "legend"="y"
@@ -34,27 +34,43 @@ legendViews.each(function (view) {
     .each(function (visualElement) {
       var elementId = visualElement.concept.id;
       var fillColor = visualElement.fillColor;
+      var fontColor = visualElement.fontColor;
+      var lineColor = visualElement.lineColor;
+      var iconColor = visualElement.iconColor;
 
-      // Only store color if we haven't seen this element yet (first legend view wins)
-      if (!elementColors[elementId] && fillColor) {
-        elementColors[elementId] = fillColor;
+      // Only store colors if we haven't seen this element yet (first legend view wins)
+      // Store if at least one color is defined
+      if (!elementColors[elementId] && (fillColor || fontColor || lineColor || iconColor)) {
+        elementColors[elementId] = {
+          fillColor: fillColor,
+          fontColor: fontColor,
+          lineColor: lineColor,
+          iconColor: iconColor
+        };
+        
+        var colorInfo = [];
+        if (fillColor) colorInfo.push("fill=" + fillColor);
+        if (fontColor) colorInfo.push("font=" + fontColor);
+        if (lineColor) colorInfo.push("line=" + lineColor);
+        if (iconColor) colorInfo.push("icon=" + iconColor);
+        
         console.log(
-          "  - Stored color " +
-            fillColor +
-            " for element: " +
+          "  - Stored colors (" +
+            colorInfo.join(", ") +
+            ") for element: " +
             visualElement.concept.name,
         );
 
-        // Apply color recursively to aggregated and composed elements
+        // Apply colors recursively to aggregated and composed elements
         var element = visualElement.concept;
-        applyColorRecursively(element, fillColor, {}, 1);
+        applyColorRecursively(element, elementColors[elementId], {}, 1);
       }
     });
 });
 
-// Recursive function to apply color to aggregated and composed elements
+// Recursive function to apply colors to aggregated and composed elements
 // visited object prevents infinite loops in case of cycles
-function applyColorRecursively(element, fillColor, visited, depth) {
+function applyColorRecursively(element, colors, visited, depth) {
   var elementId = element.id;
 
   // Avoid cycles - if we've already visited this element in this branch, stop
@@ -67,7 +83,7 @@ function applyColorRecursively(element, fillColor, visited, depth) {
 
   var indent = "    ".repeat(depth);
 
-  // Get all relationships where this element is the source
+  // Get all relationships where this element is the source (top-down only)
   $(element)
     .rels()
     .each(function (rel) {
@@ -80,59 +96,24 @@ function applyColorRecursively(element, fillColor, visited, depth) {
         var targetElement = rel.target;
         var targetId = targetElement.id;
 
-        // Apply the same color to the related element (if not already set)
+        // Apply the same colors to the part/target element (if not already set)
         if (!elementColors[targetId]) {
-          elementColors[targetId] = fillColor;
+          elementColors[targetId] = colors;
           console.log(
-            indent + "-> Related (" + relType + "): " + targetElement.name,
+            indent + "-> Part (" + relType + "): " + targetElement.name,
           );
 
-          // Recursively process this element
-          applyColorRecursively(targetElement, fillColor, visited, depth + 1);
+          // Recursively process this part
+          applyColorRecursively(targetElement, colors, visited, depth + 1);
         }
       } else if (relType === "association-relationship") {
         var targetElement = rel.target;
         var targetId = targetElement.id;
 
-        // Apply color to associated elements (but don't recurse)
+        // Apply colors to associated elements (but don't recurse)
         if (!elementColors[targetId]) {
-          elementColors[targetId] = fillColor;
+          elementColors[targetId] = colors;
           console.log(indent + "-> Associated: " + targetElement.name);
-        }
-      }
-    });
-
-  // Also check relationships where this element is the target
-  $(element)
-    .inRels()
-    .each(function (rel) {
-      var relType = rel.type;
-
-      if (
-        relType === "aggregation-relationship" ||
-        relType === "composition-relationship"
-      ) {
-        var sourceElement = rel.source;
-        var sourceId = sourceElement.id;
-
-        // Apply the same color to the related element (if not already set)
-        if (!elementColors[sourceId]) {
-          elementColors[sourceId] = fillColor;
-          console.log(
-            indent + "<- Related (" + relType + "): " + sourceElement.name,
-          );
-
-          // Recursively process this element
-          applyColorRecursively(sourceElement, fillColor, visited, depth + 1);
-        }
-      } else if (relType === "association-relationship") {
-        var sourceElement = rel.source;
-        var sourceId = sourceElement.id;
-
-        // Apply color to associated elements (but don't recurse)
-        if (!elementColors[sourceId]) {
-          elementColors[sourceId] = fillColor;
-          console.log(indent + "<- Associated: " + sourceElement.name);
         }
       }
     });
@@ -161,7 +142,11 @@ if (colorCount === 0) {
         var elementId = visualElement.concept.id;
 
         if (elementColors[elementId]) {
-          visualElement.fillColor = elementColors[elementId];
+          var colors = elementColors[elementId];
+          if (colors.fillColor) visualElement.fillColor = colors.fillColor;
+          if (colors.fontColor) visualElement.fontColor = colors.fontColor;
+          if (colors.lineColor) visualElement.lineColor = colors.lineColor;
+          if (colors.iconColor) visualElement.iconColor = colors.iconColor;
           appliedCount++;
         }
       });
