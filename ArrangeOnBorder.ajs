@@ -1,0 +1,347 @@
+/**
+ * Arrange selected elements on the border of an imaginary rectangular frame
+ *
+ * The script arranges selected diagram elements along the perimeter of a rectangle
+ * centered around the current selection's center point.
+ *
+ * Algorithm:
+ * - Uses the largest element's dimensions for spacing calculations
+ * - Distributes elements evenly on 4 sides (top, right, bottom, left)
+ * - For ideal case with 4(N-1) elements: N on top, (N-2) on right, N on bottom, (N-2) on left
+ */
+
+console.clear();
+console.show();
+
+// Get selected visual elements
+var selectedObjects = $(selection).filter("element");
+
+if (selectedObjects.size() < 4) {
+  window.alert("Please select at least 4 elements to arrange on a border");
+  exit();
+}
+
+console.log("Arranging " + selectedObjects.size() + " elements on border");
+
+/**
+ * Find the largest element dimensions
+ */
+function findMaxDimensions(objects) {
+  var maxWidth = 0;
+  var maxHeight = 0;
+
+  objects.each(function (obj) {
+    var bounds = obj.bounds;
+    if (bounds.width > maxWidth) maxWidth = bounds.width;
+    if (bounds.height > maxHeight) maxHeight = bounds.height;
+  });
+
+  return { width: maxWidth, height: maxHeight };
+}
+
+/**
+ * Calculate the center point of all selected elements
+ */
+function calculateCenterPoint(objects) {
+  var sumX = 0;
+  var sumY = 0;
+  var count = 0;
+
+  objects.each(function (obj) {
+    var bounds = obj.bounds;
+    sumX += bounds.x + bounds.width / 2;
+    sumY += bounds.y + bounds.height / 2;
+    count++;
+  });
+
+  return {
+    x: Math.round(sumX / count),
+    y: Math.round(sumY / count),
+  };
+}
+
+/**
+ * Calculate optimal n and m for the rectangular frame
+ *
+ * System of equations:
+ * 1. a*n = b*m (for square-ish shape)
+ * 2. 2*n + 2*(m-2) = N (element distribution: 2*n + 2*m - 4 = N)
+ *
+ * From (2): n + m = (N+4)/2
+ * From (1): n = (b/a)*m
+ *
+ * Solving: m = a*(N+4)/(2*(a+b))
+ *          n = (N+4)/2 - m
+ *
+ * @param {number} totalElements - Total number of elements
+ * @param {number} a - Width of largest element
+ * @param {number} b - Height of largest element
+ * @returns {object} - Object with n (horizontal count) and m (vertical count)
+ */
+function calculateNM(totalElements, a, b) {
+  console.log(
+    "Calculating n and m for totalElements=" +
+      totalElements +
+      ", a=" +
+      a +
+      ", b=" +
+      b,
+  );
+  // Calculate m (vertical count including corners)
+  var m = (a * (totalElements + 4)) / (2 * (a + b));
+  var n = (b / a) * m;
+  console.log("m=" + m, "n=" + n);
+  console.log(
+    "rectangle width (a*n): " + a * n,
+    "rectangle height (b*m): " + b * m,
+  );
+  m = Math.ceil(m);
+
+  // Calculate n (horizontal count including corners)
+  n = Math.ceil(n);
+
+  console.log(
+    "rectangle width (a*n): " + a * n,
+    "rectangle height (b*m): " + b * m,
+  );
+
+  // Ensure minimum values
+  //if (n < 2) n = 2;
+  //if (m < 2) m = 2;
+
+  return { n: n, m: m };
+}
+
+/**
+ * Distribute element count across the four sides
+ * Top and bottom each have n elements (including corners)
+ * Left and right each have m-2 elements (excluding corners)
+ */
+function distributeElements(totalElements, n, m) {
+  var distribution = {
+    top: n,
+    right: Math.max(0, m - 2),
+    bottom: n,
+    left: Math.max(0, m - 2),
+  };
+
+  var idealTotal =
+    distribution.top +
+    distribution.right +
+    distribution.bottom +
+    distribution.left;
+
+  // Adjust distribution if we have more or fewer elements than ideal
+  var diff = totalElements - idealTotal;
+
+  if (diff > 0) {
+    // Add extra elements to the longest sides (top and bottom first)
+    while (diff > 0) {
+      if (diff > 0) {
+        distribution.top++;
+        diff--;
+      }
+      if (diff > 0) {
+        distribution.bottom++;
+        diff--;
+      }
+      if (diff > 0) {
+        distribution.right++;
+        diff--;
+      }
+      if (diff > 0) {
+        distribution.left++;
+        diff--;
+      }
+    }
+  } else if (diff < 0) {
+    // Remove elements from the sides, prioritizing right and left
+    while (diff < 0) {
+      if (distribution.right > 0 && diff < 0) {
+        distribution.right--;
+        diff++;
+      }
+      if (distribution.left > 0 && diff < 0) {
+        distribution.left--;
+        diff++;
+      }
+      if (distribution.bottom > 1 && diff < 0) {
+        distribution.bottom--;
+        diff++;
+      }
+      if (distribution.top > 1 && diff < 0) {
+        distribution.top--;
+        diff++;
+      }
+    }
+  }
+
+  return distribution;
+}
+
+/**
+ * Calculate distance between two points
+ */
+function distance(x1, y1, x2, y2) {
+  var dx = x2 - x1;
+  var dy = y2 - y1;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+/**
+ * Generate all target positions along the border
+ */
+function generateTargetPositions(center, maxDim, distribution, n, m) {
+  var positions = [];
+  
+  // Calculate rectangle dimensions based on n and m
+  var rectWidth = maxDim.width * n;
+  var rectHeight = maxDim.height * m;
+
+  // Starting corner (top-left)
+  var startX = center.x - rectWidth / 2;
+  var startY = center.y - rectHeight / 2;
+
+  // TOP side (left to right)
+  for (var i = 0; i < distribution.top; i++) {
+    var x = startX + (i * rectWidth) / Math.max(1, distribution.top - 1);
+    var y = startY;
+    positions.push({ x: x, y: y });
+  }
+
+  // RIGHT side (top to bottom, excluding corners)
+  for (var i = 1; i <= distribution.right; i++) {
+    var x = startX + rectWidth;
+    var y = startY + (i * rectHeight) / Math.max(1, distribution.right + 1);
+    positions.push({ x: x, y: y });
+  }
+
+  // BOTTOM side (right to left)
+  for (var i = 0; i < distribution.bottom; i++) {
+    var x = startX + rectWidth - (i * rectWidth) / Math.max(1, distribution.bottom - 1);
+    var y = startY + rectHeight;
+    positions.push({ x: x, y: y });
+  }
+
+  // LEFT side (bottom to top, excluding corners)
+  for (var i = 1; i <= distribution.left; i++) {
+    var x = startX;
+    var y = startY + rectHeight - (i * rectHeight) / Math.max(1, distribution.left + 1);
+    positions.push({ x: x, y: y });
+  }
+
+  return positions;
+}
+
+/**
+ * Position elements along the border by matching closest elements to target positions
+ */
+function positionElements(objects, center, maxDim, distribution, n, m) {
+  // Save current positions of all elements
+  var elementsWithPositions = [];
+  objects.each(function (obj) {
+    var bounds = obj.bounds;
+    elementsWithPositions.push({
+      element: obj,
+      currentX: bounds.x + bounds.width / 2,
+      currentY: bounds.y + bounds.height / 2,
+      assigned: false
+    });
+  });
+
+  // Generate all target positions
+  var targetPositions = generateTargetPositions(center, maxDim, distribution, n, m);
+
+  console.log("Generated " + targetPositions.length + " target positions");
+
+  // Match each target position to the closest unassigned element
+  for (var t = 0; t < targetPositions.length; t++) {
+    var target = targetPositions[t];
+    var closestIndex = -1;
+    var closestDistance = Infinity;
+
+    // Find the closest unassigned element
+    for (var e = 0; e < elementsWithPositions.length; e++) {
+      if (!elementsWithPositions[e].assigned) {
+        var dist = distance(
+          elementsWithPositions[e].currentX,
+          elementsWithPositions[e].currentY,
+          target.x,
+          target.y
+        );
+        if (dist < closestDistance) {
+          closestDistance = dist;
+          closestIndex = e;
+        }
+      }
+    }
+
+    // Assign and position the closest element
+    if (closestIndex >= 0) {
+      elementsWithPositions[closestIndex].assigned = true;
+      positionElement(elementsWithPositions[closestIndex].element, target.x, target.y);
+    }
+  }
+}
+
+/**
+ * Position a single element (centered on the given coordinates)
+ */
+function positionElement(element, centerX, centerY) {
+  var bounds = element.bounds;
+  element.bounds = {
+    x: Math.round(centerX - bounds.width / 2),
+    y: Math.round(centerY - bounds.height / 2),
+    width: bounds.width,
+    height: bounds.height,
+  };
+}
+
+// Main execution
+var maxDimensions = findMaxDimensions(selectedObjects);
+var centerPoint = calculateCenterPoint(selectedObjects);
+var nm = calculateNM(
+  selectedObjects.size(),
+  maxDimensions.width,
+  maxDimensions.height,
+);
+var distribution = distributeElements(selectedObjects.size(), nm.n, nm.m);
+
+console.log(
+  "Max element size: " + maxDimensions.width + " x " + maxDimensions.height,
+);
+console.log("Center point: (" + centerPoint.x + ", " + centerPoint.y + ")");
+console.log("n (horizontal): " + nm.n + ", m (vertical): " + nm.m);
+console.log(
+  "with=",
+  maxDimensions.width * nm.n,
+  "height=",
+  maxDimensions.height * nm.m,
+);
+console.log(
+  "Rectangle dimensions: " +
+    maxDimensions.width * nm.n +
+    " x " +
+    maxDimensions.height * nm.m,
+);
+console.log(
+  "Distribution - Top: " +
+    distribution.top +
+    ", Right: " +
+    distribution.right +
+    ", Bottom: " +
+    distribution.bottom +
+    ", Left: " +
+    distribution.left,
+);
+
+positionElements(
+  selectedObjects,
+  centerPoint,
+  maxDimensions,
+  distribution,
+  nm.n,
+  nm.m,
+);
+
+console.log("Elements arranged successfully!");

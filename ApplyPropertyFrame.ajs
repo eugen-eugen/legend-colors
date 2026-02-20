@@ -1,0 +1,104 @@
+/*
+ * Apply Property Frame
+ *
+ * This script applies a thick dashed border to selected visual elements.
+ * The border color is automatically contrasted to the element's fill color.
+ *
+ * (c) Y. Moldawski
+ */
+
+console.log("Starting Apply Property Frame script...");
+
+// Print all selected things
+console.log("--- Selection Info ---");
+console.log("Total selected items: " + selection.size());
+$(selection).each(function (item) {
+  console.log(
+    "  - Type: " + item.type + ", Name: " + item.name + ", ID: " + item.id,
+  );
+});
+console.log("--- End Selection Info ---");
+
+// Get selected visual elements
+var selectedElements = $(selection).filter("element");
+
+if (selectedElements.size() === 0) {
+  console.log("No visual elements selected.");
+  window.alert("Please select at least one visual element.");
+  exit();
+}
+
+// Function to get complement color
+function getComplementColor(fillColor) {
+  // If no fill color, default to red
+  if (!fillColor) {
+    return "#ff0000";
+  }
+
+  // Remove # if present
+  var hex = fillColor.replace("#", "");
+
+  // Convert to RGB
+  var r = parseInt(hex.substring(0, 2), 16);
+  var g = parseInt(hex.substring(2, 4), 16);
+  var b = parseInt(hex.substring(4, 6), 16);
+
+  // Calculate complement by inverting RGB values
+  var compR = 255 - r;
+  var compG = 255 - g;
+  var compB = 255 - b;
+
+  // Convert back to hex
+  var compHex =
+    "#" +
+    ("0" + compR.toString(16)).slice(-2) +
+    ("0" + compG.toString(16)).slice(-2) +
+    ("0" + compB.toString(16)).slice(-2);
+
+  return compHex;
+}
+
+// Process each selected element
+selectedElements.each(function (visualElement) {
+  var element = visualElement.concept;
+  
+  // Check if element has property "ab" or "bis"
+  var hasAbProperty = element.prop("ab") !== null;
+  var hasBisProperty = element.prop("bis") !== null;
+  
+  if (hasAbProperty || hasBisProperty) {
+    // Apply highlighted frame with complement color
+    var fillColor = visualElement.fillColor;
+    var complementColor = getComplementColor(fillColor);
+    
+    visualElement.lineStyle = LINE_STYLE.DASHED;
+    visualElement.lineColor = complementColor;
+    visualElement.deriveLineColor = false;
+    visualElement.lineWidth = 3; // Thick line
+    
+    console.log(
+      "  - Applied highlighted frame to element: " +
+        element.name +
+        " (has property: " + (hasAbProperty ? "ab" : "bis") + ")" +
+        " (Fill: " +
+        (fillColor || "none") +
+        ", Border: " +
+        complementColor +
+        ")"
+    );
+  } else {
+    // Apply default frame
+    visualElement.lineStyle = LINE_STYLE.LINE;
+    visualElement.lineColor = null;
+    visualElement.deriveLineColor = true;
+    visualElement.lineWidth = 1; // Default line width
+    
+    console.log(
+      "  - Applied default frame to element: " +
+        element.name +
+        " (no 'ab' or 'bis' property)"
+    );
+  }
+});
+
+console.log("Property Frame script completed successfully.");

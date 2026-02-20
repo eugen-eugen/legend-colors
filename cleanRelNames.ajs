@@ -1,0 +1,80 @@
+/*
+ * Clean Redundant Relationship Names
+ *
+ * This script processes relationships that have multiple properties with key "Schnittstelle".
+ * If the relationship name consists only of the comma-separated values of these properties,
+ * the name is cleared (set to empty) as it's redundant.
+ * Otherwise, the case is logged for manual review.
+ *
+ * (c) Y. Moldawski, 2026
+ */
+
+console.log("Starting Clean Relationship Names script...");
+
+var processedCount = 0;
+var clearedCount = 0;
+var skippedCount = 0;
+
+// Get all relationships in the model
+$("relationship").each(function (rel) {
+  // Check if relationship has non-empty name
+  if (!rel.name || rel.name.trim() === "") {
+    return; // Skip relationships with empty names
+  }
+
+  // Get all property values with key "Schnittstelle"
+  // prop("key", duplicate=true) returns an array of all values for properties with that key
+  var schnittstelleValues = rel.prop("Schnittstelle", true);
+
+  // Skip if no Schnittstelle properties found
+  if (!schnittstelleValues || schnittstelleValues.length === 0) {
+    return;
+  }
+
+  processedCount++;
+
+  // Build expected name from property values (both direct and reversed order)
+  var expectedName = schnittstelleValues.join(", ");
+  var expectedNameReversed = schnittstelleValues.slice().reverse().join(", ");
+
+  // Compare actual name with expected name (check both orders)
+  var actualName = rel.name.trim();
+  if (actualName === expectedName.trim() || actualName === expectedNameReversed.trim()) {
+    // Name is redundant, clear it
+    console.log(
+      "Clearing name for relationship: " +
+        rel.id +
+        " (was: '" +
+        rel.name +
+        "')",
+    );
+    rel.name = "";
+    clearedCount++;
+  } else {
+    // Name contains additional information, log for review
+    console.log(
+      "REVIEW: Relationship " +
+        rel.id +
+        " has name '" +
+        rel.name +
+        "' but properties suggest '" +
+        expectedName +
+        "' or '" +
+        expectedNameReversed +
+        "'",
+    );
+    console.log(
+      "  Source: " + rel.source.name + " -> Target: " + rel.target.name,
+    );
+    skippedCount++;
+  }
+});
+
+// Summary
+console.log("\n=== Summary ===");
+console.log(
+  "Processed relationships with Schnittstelle properties: " + processedCount,
+);
+console.log("Names cleared (were redundant): " + clearedCount);
+console.log("Names kept (contain additional info): " + skippedCount);
+console.log("\nScript completed.");

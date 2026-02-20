@@ -40,20 +40,23 @@ legendViews.each(function (view) {
 
       // Only store colors if we haven't seen this element yet (first legend view wins)
       // Store if at least one color is defined
-      if (!elementColors[elementId] && (fillColor || fontColor || lineColor || iconColor)) {
+      if (
+        !elementColors[elementId] &&
+        (fillColor || fontColor || lineColor || iconColor)
+      ) {
         elementColors[elementId] = {
           fillColor: fillColor,
           fontColor: fontColor,
           lineColor: lineColor,
-          iconColor: iconColor
+          iconColor: iconColor,
         };
-        
+
         var colorInfo = [];
         if (fillColor) colorInfo.push("fill=" + fillColor);
         if (fontColor) colorInfo.push("font=" + fontColor);
         if (lineColor) colorInfo.push("line=" + lineColor);
         if (iconColor) colorInfo.push("icon=" + iconColor);
-        
+
         console.log(
           "  - Stored colors (" +
             colorInfo.join(", ") +
