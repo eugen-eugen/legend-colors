@@ -39,7 +39,10 @@ $("relationship").each(function (rel) {
 
   // Compare actual name with expected name (check both orders)
   var actualName = rel.name.trim();
-  if (actualName === expectedName.trim() || actualName === expectedNameReversed.trim()) {
+  if (
+    actualName === expectedName.trim() ||
+    actualName === expectedNameReversed.trim()
+  ) {
     // Name is redundant, clear it
     console.log(
       "Clearing name for relationship: " +

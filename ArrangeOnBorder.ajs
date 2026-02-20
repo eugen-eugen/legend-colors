@@ -193,7 +193,7 @@ function distance(x1, y1, x2, y2) {
  */
 function generateTargetPositions(center, maxDim, distribution, n, m) {
   var positions = [];
-  
+
   // Calculate rectangle dimensions based on n and m
   var rectWidth = maxDim.width * n;
   var rectHeight = maxDim.height * m;
@@ -218,7 +218,10 @@ function generateTargetPositions(center, maxDim, distribution, n, m) {
 
   // BOTTOM side (right to left)
   for (var i = 0; i < distribution.bottom; i++) {
-    var x = startX + rectWidth - (i * rectWidth) / Math.max(1, distribution.bottom - 1);
+    var x =
+      startX +
+      rectWidth -
+      (i * rectWidth) / Math.max(1, distribution.bottom - 1);
     var y = startY + rectHeight;
     positions.push({ x: x, y: y });
   }
@@ -226,7 +229,10 @@ function generateTargetPositions(center, maxDim, distribution, n, m) {
   // LEFT side (bottom to top, excluding corners)
   for (var i = 1; i <= distribution.left; i++) {
     var x = startX;
-    var y = startY + rectHeight - (i * rectHeight) / Math.max(1, distribution.left + 1);
+    var y =
+      startY +
+      rectHeight -
+      (i * rectHeight) / Math.max(1, distribution.left + 1);
     positions.push({ x: x, y: y });
   }
 
@@ -245,12 +251,18 @@ function positionElements(objects, center, maxDim, distribution, n, m) {
       element: obj,
       currentX: bounds.x + bounds.width / 2,
       currentY: bounds.y + bounds.height / 2,
-      assigned: false
+      assigned: false,
     });
   });
 
   // Generate all target positions
-  var targetPositions = generateTargetPositions(center, maxDim, distribution, n, m);
+  var targetPositions = generateTargetPositions(
+    center,
+    maxDim,
+    distribution,
+    n,
+    m,
+  );
 
   console.log("Generated " + targetPositions.length + " target positions");
 
@@ -267,7 +279,7 @@ function positionElements(objects, center, maxDim, distribution, n, m) {
           elementsWithPositions[e].currentX,
           elementsWithPositions[e].currentY,
           target.x,
-          target.y
+          target.y,
         );
         if (dist < closestDistance) {
           closestDistance = dist;
@@ -279,7 +291,11 @@ function positionElements(objects, center, maxDim, distribution, n, m) {
     // Assign and position the closest element
     if (closestIndex >= 0) {
       elementsWithPositions[closestIndex].assigned = true;
-      positionElement(elementsWithPositions[closestIndex].element, target.x, target.y);
+      positionElement(
+        elementsWithPositions[closestIndex].element,
+        target.x,
+        target.y,
+      );
     }
   }
 }

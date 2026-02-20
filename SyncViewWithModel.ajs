@@ -5,8 +5,8 @@
  *
  * Only elements marked as "Kernelement" (core elements) will attract new elements.
  * An element is marked as Kernelement if it's a child of a visual group
- * with property "Kernelement" set. 
- * 
+ * with property "Kernelement" set.
+ *
  * If the property value is "recursive", all children (recursively) are attractors.
  * If the property has no value or any other value, only direct children are attractors.
  *
@@ -79,8 +79,14 @@ function getAttractors(view) {
     .each(function (group) {
       var kernelementValue = group.prop("Kernelement");
       if (kernelementValue != null) {
-        console.log("  Found Kernelement group: " + group.name + " (Kernelement=" + kernelementValue + ")");
-        
+        console.log(
+          "  Found Kernelement group: " +
+            group.name +
+            " (Kernelement=" +
+            kernelementValue +
+            ")",
+        );
+
         // Check if recursive collection is requested
         var children;
         if (kernelementValue === "recursive") {
@@ -90,7 +96,7 @@ function getAttractors(view) {
           children = collectDirectChildVisualObjects(group);
           console.log("    Using direct children only");
         }
-        
+
         attractors = attractors.concat(children);
       }
     });
@@ -112,7 +118,7 @@ function getRelatedElementsWithRelationships(element) {
     .each(function (rel) {
       var target = rel.target;
       if (!seen[target.id]) {
-        relatedElements.push({element: target, relationship: rel});
+        relatedElements.push({ element: target, relationship: rel });
         seen[target.id] = true;
       }
     });
@@ -123,7 +129,7 @@ function getRelatedElementsWithRelationships(element) {
     .each(function (rel) {
       var source = rel.source;
       if (!seen[source.id]) {
-        relatedElements.push({element: source, relationship: rel});
+        relatedElements.push({ element: source, relationship: rel });
         seen[source.id] = true;
       }
     });
@@ -223,13 +229,17 @@ function processView(view) {
     relatedInfo.forEach(function (info) {
       var relatedElement = info.element;
       var relationship = info.relationship;
-      
+
       // Check if element has "no-auto-sync" property - skip if it does
       if (relatedElement.prop("no-auto-sync") != null) {
-        console.log("    Skipping " + relatedElement.name + " (has no-auto-sync property)");
+        console.log(
+          "    Skipping " +
+            relatedElement.name +
+            " (has no-auto-sync property)",
+        );
         return; // Skip this element
       }
-      
+
       // Check if this element is not yet on the view
       if (!isElementOnView(view, relatedElement)) {
         if (!seenMissing[relatedElement.id]) {
@@ -239,7 +249,7 @@ function processView(view) {
         // Store the relationship to add later
         relationshipsToAdd.push({
           relationship: relationship,
-          attractorElement: attractorElement
+          attractorElement: attractorElement,
         });
       }
     });

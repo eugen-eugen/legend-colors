@@ -61,30 +61,32 @@ function getComplementColor(fillColor) {
 // Process each selected element
 selectedElements.each(function (visualElement) {
   var element = visualElement.concept;
-  
+
   // Check if element has property "ab" or "bis"
   var hasAbProperty = element.prop("ab") !== null;
   var hasBisProperty = element.prop("bis") !== null;
-  
+
   if (hasAbProperty || hasBisProperty) {
     // Apply highlighted frame with complement color
     var fillColor = visualElement.fillColor;
     var complementColor = getComplementColor(fillColor);
-    
+
     visualElement.lineStyle = LINE_STYLE.DASHED;
     visualElement.lineColor = complementColor;
     visualElement.deriveLineColor = false;
     visualElement.lineWidth = 3; // Thick line
-    
+
     console.log(
       "  - Applied highlighted frame to element: " +
         element.name +
-        " (has property: " + (hasAbProperty ? "ab" : "bis") + ")" +
+        " (has property: " +
+        (hasAbProperty ? "ab" : "bis") +
+        ")" +
         " (Fill: " +
         (fillColor || "none") +
         ", Border: " +
         complementColor +
-        ")"
+        ")",
     );
   } else {
     // Apply default frame
@@ -92,11 +94,11 @@ selectedElements.each(function (visualElement) {
     visualElement.lineColor = null;
     visualElement.deriveLineColor = true;
     visualElement.lineWidth = 1; // Default line width
-    
+
     console.log(
       "  - Applied default frame to element: " +
         element.name +
-        " (no 'ab' or 'bis' property)"
+        " (no 'ab' or 'bis' property)",
     );
   }
 });
