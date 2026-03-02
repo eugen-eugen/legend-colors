@@ -7,8 +7,17 @@
  * An element is marked as Kernelement if it's a child of a visual group
  * with property "Kernelement" set.
  *
- * If the property value is "recursive", all children (recursively) are attractors.
+ * If the property value is "recursive", all children (recursively) are attractors,
+ * following the visual parent/child hierarchy on the view.
  * If the property has no value or any other value, only direct children are attractors.
+ *
+ * A meta-model can be defined on the view by:
+ * 1. Creating a visual group with property "meta", OR
+ * 2. Placing a view reference element on the view that points to another view with property "meta".
+ *    In this case, all elements on the referenced view are considered part of the meta-model.
+ * The meta-model defines which relationships are allowed between which types of elements.
+ * Only relationships allowed by the meta-model will be followed for synchronization.
+ * Aggregation and composition in the meta-model are treated as equivalent.
  *
  * For each attractor element, the script checks if there are directly related elements
  * in the model that are not yet visualized on the view. Such elements are added to a
@@ -20,88 +29,38 @@
  *
  * Views that receive new elements get a "review-" prefix in their name.
  *
+ * DEBUG: Set property "debug" with value "true" on any Kernelement visual group to enable
+ *        detailed logging information in the console.
+ *        For meta-model debugging: set "debug=true" on the meta-model visual group,
+ *        or on the referenced view if using the view reference approach.
+ *
  * (c) Y. Moldawski, 2026
  */
 
-console.show();
-console.clear();
-console.log("Starting Sync View With Model script...");
+// Load helper libraries
+load(__DIR__ + "lib/attractors.js");
+load(__DIR__ + "lib/metamodel.js");
 
 /**
- * Recursively collects all visual objects that are children of a given parent
+ * Checks if any Kernelement group in the view has debug enabled
+ * @param {View} view - The view to check
+ * @returns {boolean} True if any Kernelement group has property "debug" with value "true"
  */
-function collectChildVisualObjectsRecursive(parent, result) {
-  if (!result) {
-    result = [];
-  }
-
-  $(parent)
-    .children()
-    .each(function (child) {
-      // Add the child if it's an element (has a concept)
-      if (child.concept) {
-        result.push(child);
-      }
-      // Recursively process children of this child
-      collectChildVisualObjectsRecursive(child, result);
-    });
-
-  return result;
-}
-
-/**
- * Collects only direct child visual objects (non-recursive)
- */
-function collectDirectChildVisualObjects(parent) {
-  var result = [];
-
-  $(parent)
-    .children()
-    .each(function (child) {
-      // Add the child if it's an element (has a concept)
-      if (child.concept) {
-        result.push(child);
-      }
-    });
-
-  return result;
-}
-
-/**
- * Gets all visual objects that are attractors (children of Kernelement groups)
- */
-function getAttractors(view) {
-  var attractors = [];
-
-  // Find all visual groups with property "Kernelement" (regardless of value)
+function hasDebugEnabled(view) {
+  var debugEnabled = false;
   $(view)
     .find("diagram-model-group")
     .each(function (group) {
       var kernelementValue = group.prop("Kernelement");
       if (kernelementValue != null) {
-        console.log(
-          "  Found Kernelement group: " +
-            group.name +
-            " (Kernelement=" +
-            kernelementValue +
-            ")",
-        );
-
-        // Check if recursive collection is requested
-        var children;
-        if (kernelementValue === "recursive") {
-          children = collectChildVisualObjectsRecursive(group);
-          console.log("    Using recursive collection");
-        } else {
-          children = collectDirectChildVisualObjects(group);
-          console.log("    Using direct children only");
+        var debugValue = group.prop("debug");
+        if (debugValue === "true") {
+          debugEnabled = true;
+          return false; // break
         }
-
-        attractors = attractors.concat(children);
       }
     });
-
-  return attractors;
+  return debugEnabled;
 }
 
 /**
@@ -172,7 +131,7 @@ function findVisualObjectForElement(view, element) {
 /**
  * Finds or creates a "New Elements" group at the top-left of the view
  */
-function findOrCreateNewElementsGroup(view) {
+function findOrCreateNewElementsGroup(view, debugEnabled) {
   var newElementsGroup = null;
 
   // Try to find existing group
@@ -187,15 +146,11 @@ function findOrCreateNewElementsGroup(view) {
 
   // Create if not found
   if (!newElementsGroup) {
-    newElementsGroup = view.createObject(
-      "diagram-model-group",
-      10,
-      10,
-      200,
-      100,
-    );
+    newElementsGroup = view.createObject("diagram-model-group", 10, 10, 200, 100);
     newElementsGroup.name = "New Elements";
-    console.log("  Created 'New Elements' group");
+    if (debugEnabled) {
+      console.log("  Created 'New Elements' group");
+    }
   }
 
   return newElementsGroup;
@@ -204,18 +159,34 @@ function findOrCreateNewElementsGroup(view) {
 /**
  * Processes a single view
  */
-function processView(view) {
-  console.log("\nProcessing view: " + view.name);
+function processView(view, debugEnabled) {
+  if (debugEnabled) {
+    console.log("\nProcessing view: " + view.name);
+  }
 
-  // Get all attractors in this view
-  var attractors = getAttractors(view);
+  // Extract meta-model if present
+  var metaModel = extractMetaModel(view);
+  if (debugEnabled) {
+    if (metaModel) {
+      console.log("  Meta-model enabled for this view");
+    } else {
+      console.log("  No meta-model found (all relationships allowed)");
+    }
+  }
+
+  // Get all attractors in this view (passing meta-model for recursive collection)
+  var attractors = getAttractors(view, metaModel, isRelationshipAllowed, debugEnabled);
 
   if (attractors.length === 0) {
-    console.log("  No Kernelement groups found, skipping view");
+    if (debugEnabled) {
+      console.log("  No Kernelement groups found, skipping view");
+    }
     return;
   }
 
-  console.log("  Found " + attractors.length + " attractor(s)");
+  if (debugEnabled) {
+    console.log("  Found " + attractors.length + " attractor(s)");
+  }
 
   // Collect all missing elements and relationships to add
   var missingElements = [];
@@ -232,12 +203,25 @@ function processView(view) {
 
       // Check if element has "no-auto-sync" property - skip if it does
       if (relatedElement.prop("no-auto-sync") != null) {
-        console.log(
-          "    Skipping " +
-            relatedElement.name +
-            " (has no-auto-sync property)",
-        );
+        if (debugEnabled) {
+          console.log("    Skipping " + relatedElement.name + " (has no-auto-sync property)");
+        }
         return; // Skip this element
+      }
+
+      // Check if relationship is allowed by meta-model
+      // Use the actual source and target from the relationship, not assumptions
+      if (!isRelationshipAllowed(relationship.source, relationship.target, relationship, metaModel)) {
+        if (debugEnabled) {
+          console.log(
+            "    Skipping " +
+              relatedElement.name +
+              " (relationship " +
+              relationship.type +
+              " not allowed by meta-model)",
+          );
+        }
+        return;
       }
 
       // Check if this element is not yet on the view
@@ -256,16 +240,18 @@ function processView(view) {
   });
 
   if (missingElements.length === 0) {
-    console.log("  No missing elements found");
+    if (debugEnabled) {
+      console.log("  No missing elements found");
+    }
     return;
   }
 
-  console.log(
-    "  Found " + missingElements.length + " missing element(s) to add",
-  );
+  if (debugEnabled) {
+    console.log("  Found " + missingElements.length + " missing element(s) to add");
+  }
 
   // Find or create "New Elements" group
-  var newElementsGroup = findOrCreateNewElementsGroup(view);
+  var newElementsGroup = findOrCreateNewElementsGroup(view, debugEnabled);
 
   // Add missing elements to the group
   var xOffset = 20;
@@ -278,19 +264,14 @@ function processView(view) {
     var x = xOffset;
     var y = yOffset + index * (elementHeight + spacing);
 
-    var visualElement = newElementsGroup.add(
-      element,
-      x,
-      y,
-      elementWidth,
-      elementHeight,
-    );
-    console.log("    Added: " + element.name + " (" + element.type + ")");
+    var visualElement = newElementsGroup.add(element, x, y, elementWidth, elementHeight);
+    if (debugEnabled) {
+      console.log("    Added: " + element.name + " (" + element.type + ")");
+    }
   });
 
   // Adjust group size to fit all elements
-  var groupHeight =
-    yOffset + missingElements.length * (elementHeight + spacing) + 20;
+  var groupHeight = yOffset + missingElements.length * (elementHeight + spacing) + 20;
   newElementsGroup.bounds = {
     x: 10,
     y: 10,
@@ -299,7 +280,9 @@ function processView(view) {
   };
 
   // Add visual connections for the relationships
-  console.log("  Adding relationships...");
+  if (debugEnabled) {
+    console.log("  Adding relationships...");
+  }
   var addedConnections = 0;
   relationshipsToAdd.forEach(function (relInfo) {
     var relationship = relInfo.relationship;
@@ -316,21 +299,44 @@ function processView(view) {
       addedConnections++;
     }
   });
-  console.log("  Added " + addedConnections + " relationship(s)");
+  if (debugEnabled) {
+    console.log("  Added " + addedConnections + " relationship(s)");
+  }
 
   // Add "review-" prefix to view name if not already present
   if (!view.name.startsWith("review-")) {
     view.name = "review-" + view.name;
-    console.log("  Renamed view to: " + view.name);
+    if (debugEnabled) {
+      console.log("  Renamed view to: " + view.name);
+    }
   }
 }
 
 // Main execution
 var views = $("archimate-diagram-model");
-console.log("\nFound " + views.size() + " ArchiMate view(s) to process\n");
 
+// Check if any view has debug enabled
+var debugEnabled = false;
 views.each(function (view) {
-  processView(view);
+  if (hasDebugEnabled(view)) {
+    debugEnabled = true;
+    return false; // break
+  }
 });
 
-console.log("\n=== Sync completed ===");
+// Only show console if debug is enabled
+if (debugEnabled) {
+  console.show();
+  console.clear();
+  console.log("Starting Sync View With Model script...");
+  console.log("\nFound " + views.size() + " ArchiMate view(s) to process\n");
+}
+
+views.each(function (view) {
+  var viewDebug = hasDebugEnabled(view);
+  processView(view, viewDebug);
+});
+
+if (debugEnabled) {
+  console.log("\n=== Sync completed ===");
+}

@@ -1,69 +1,127 @@
-# Legend Colors for Archi
+# Legend Colors and View Management Scripts for Archi
 
-An Archi script that applies fill, text, line, and icon colors from legend views to elements across all views in your model.
+A collection of Archi scripts for managing colors, synchronizing views with models, identifying isolated elements, and organizing view layouts.
 
-## Overview
+## Scripts
 
-This script automatically propagates colors from designated "legend" views to all instances of the same elements throughout your Archi model. It also recursively applies colors to aggregated and composed elements following a top-down hierarchy (from aggregates/composites to their parts), making it easy to maintain consistent color schemes across complex models.
+### [ApplyLegendColors.ajs](doc/ApplyLegendColors.md)
+Propagates colors from legend views to all element instances throughout the model. Supports aggregation/composition relationships with recursive color application. Uses views marked with `legend="y"` property as color sources.
 
-## Features
+**Key Features**: Legend-based coloring • Multiple color types • First-wins logic • Top-down hierarchy • Cycle detection
 
-- **Legend-based coloring**: Identifies views marked with property `legend="y"` and uses them as color sources
-- **Multiple color types**: Applies fill color, text/font color, line color, and icon color from legend elements
-- **First-wins logic**: When an element appears on multiple legend views, the first colors found are applied
-- **Top-down aggregation/composition**: Automatically colors all parts of aggregated and composed elements, recursively following the hierarchy from whole to parts
-- **Association support**: Also applies colors to associated elements (non-recursive)
-- **Cycle detection**: Prevents infinite loops when processing circular relationships
-- **Detailed logging**: Console output shows which elements are being colored and their relationships
+### [SyncViewWithModel.ajs](doc/SyncViewWithModel.md)
+Automatically adds related elements to views where core elements exist. Only Kernelement (core element) groups attract new elements. Places additions in "New Elements" group and marks views with "review-" prefix.
 
-## Usage
+**Key Features**: Kernelement-based • Automatic relationship display • Meta-model support • Review marking • Exclusion support
 
-1. Create one or more views in your Archi model to serve as color legends
-2. Add the property `legend` with value `y` to each legend view
-3. Color the elements on your legend views with the desired fill, text, line, and/or icon colors
-4. Run the `ApplyLegendColors.ajs` script
-5. All instances of those elements across all views will be colored accordingly
+### [MarkIsolatedElements.ajs](doc/MarkIsolatedElements.md)
+Identifies and marks elements on the selected view that have no connection path to Kernelement attractors. Creates red visual notes for isolated elements.
 
-## How It Works
+**Key Features**: Attractor identification • Recursive relationship analysis • Visual marking • Connection path detection
 
-The script processes elements in this order:
+### [cleanRelNames.ajs](doc/cleanRelNames.md)
+Removes redundant relationship names when they consist only of "Schnittstelle" property values. Compares names with comma-separated property values and clears matches.
 
-1. Finds all views with property `legend="y"`
-2. For each element on legend views:
-   - Stores the element's fill, text, line, and icon colors (first-wins if element appears on multiple legend views)
-   - Recursively follows aggregation and composition relationships top-down (from aggregate/composite to its parts)
-   - Applies colors to associated elements (outgoing only, without recursion)
-3. Applies stored colors to all visual representations across all non-legend views
-4. Legend views themselves are skipped during the color application phase to preserve original coloring
+**Key Features**: Redundancy detection • Multiple property support • Bidirectional matching • Manual review logging
 
-### Relationship Handling
+### [ApplyPropertyFrame.ajs](doc/ApplyPropertyFrame.md)
+Applies visual borders to selected elements based on temporal properties ("ab" and "bis"). Elements with these properties get thick dashed borders with colors contrasted to fill color.
 
-- **Aggregation/Composition**: Colors are applied recursively top-down only (from aggregate/composite to its parts/targets)
-- **Association**: Colors are applied to outgoing associations only, without recursive traversal
-- **Cycle Prevention**: The visited tracking mechanism prevents infinite loops in circular relationship structures
+**Key Features**: Temporal property detection • Complement color calculation • Thick dashed borders • Selection-based
 
-## Requirements
+### [ArrangeOnBorder.ajs](doc/ArrangeOnBorder.md)
+Arranges selected visual elements along the perimeter of a rectangular frame. Distributes elements evenly on four sides using closest-match algorithm.
 
-- Archi (with jArchi scripting support)
-- At least one view with property `legend="y"`
-- Elements on legend views must have at least one color property set (fill, text, line, or icon color)
+**Key Features**: Square-ish frame calculation • Even distribution • Closest-match positioning • Largest-element spacing
+
+## Shared Concepts
+
+### Kernelement Groups
+
+Several scripts use "Kernelement" (core element) groups to identify attractor elements:
+
+1. Create a visual group on your view
+2. Add property `Kernelement` with any value
+3. Place elements inside the group - they become attractors
+
+**Property Values**:
+- `Kernelement=""` (or any non-"recursive" value): Only direct children are attractors
+- `Kernelement="recursive"`: All descendants (recursive traversal) are attractors
+
+**Used by**: `SyncViewWithModel.ajs`, `MarkIsolatedElements.ajs`
+
+### Shared Library
+
+`lib/attractors.js` - Shared attractor identification functions:
+- `getAttractors(view, verbose)` - Returns attractor visual objects
+- `collectChildVisualObjectsRecursive(parent, result)` - Recursively collects children
+- `collectDirectChildVisualObjects(parent)` - Collects direct children
+- `getAttractorConcepts(attractorVisuals)` - Extracts model elements
 
 ## Installation
 
-1. Copy `ApplyLegendColors.ajs` to your Archi scripts folder
-2. The script will appear in Archi's Scripts menu
+### Direct Installation
 
-## Example
+1. Copy all `.ajs` files to your Archi scripts folder
+2. Copy the `lib/` folder (if present) to maintain shared code
+3. Scripts will appear in Archi's Scripts menu
 
+### Docker Installation
+
+The scripts are published as a Docker image on Docker Hub at `jemojemo/archi-legend-colors`.
+
+**Pull the image**:
+```bash
+docker pull jemojemo/archi-legend-colors:latest
 ```
-Legend View (legend="y"):
-├── Service Component [Fill: Blue, Text: White, Line: Dark Blue, Icon: Light Blue]
-│   ├── aggregates → Database [Fill: Green, Text: Black, Icon: Dark Green]
-│   └── composed of → API Module [Fill: Yellow, Line: Orange]
 
-Result: All instances of Service Component, Database, and API Module 
-across all views will have their respective fill, text, line, and icon colors applied.
+**Extract scripts to your local Archi scripts folder**:
+```bash
+# Create a temporary container
+docker create --name temp-legend jemojemo/archi-legend-colors:latest
+
+# Copy scripts from container to your local folder
+docker cp temp-legend:/archi-scripts/legend-colors/ ~/path/to/your/archi/scripts/
+
+# Remove temporary container
+docker rm temp-legend
 ```
+
+**Note**: Replace `~/path/to/your/archi/scripts/` with your actual Archi scripts directory path.
+
+**Versioning**:
+- `latest` - Latest version from main branch
+- `YYYY.MM.DD` - Date-based versions (e.g., `2026.03.02`)
+- `vX.Y.Z` - Semantic versions when tagged (e.g., `v1.0.0`)
+
+## Documentation
+
+Detailed documentation for each script is available in the [doc/](doc/) folder:
+- [ApplyLegendColors.md](doc/ApplyLegendColors.md)
+- [SyncViewWithModel.md](doc/SyncViewWithModel.md)
+- [MarkIsolatedElements.md](doc/MarkIsolatedElements.md)
+- [cleanRelNames.md](doc/cleanRelNames.md)
+- [ApplyPropertyFrame.md](doc/ApplyPropertyFrame.md)
+- [ArrangeOnBorder.md](doc/ArrangeOnBorder.md)
+
+Each documentation file includes:
+- **Model Elements That Matter**: Which properties, relationships, and elements affect the script
+- **How It Works**: Processing logic and algorithms
+- **Usage**: Step-by-step instructions
+- **Example Scenarios**: Real-world usage examples with before/after
+- **Console Output**: Expected console messages
+- **Troubleshooting**: Common issues and solutions
+- **Use Cases**: When to use the script
+
+## Requirements
+
+- Archi (with jArchi plugin for scripting support)
+- Appropriate model structure depending on script:
+  - Legend views for `ApplyLegendColors.ajs`
+  - Kernelement groups for `SyncViewWithModel.ajs` and `MarkIsolatedElements.ajs`
+  - Schnittstelle properties for `cleanRelNames.ajs`
+  - Temporal properties (ab/bis) for `ApplyPropertyFrame.ajs`
+  - Selection of 4+ elements for `ArrangeOnBorder.ajs`
 
 ## Author
 
