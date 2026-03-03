@@ -1,11 +1,11 @@
 /*
  * Meta Formatting
  *
- * This script applies font formatting from meta-model elements and relationships 
+ * This script applies font formatting from meta-model elements and relationships
  * to all matching visual elements and relationships.
  *
  * For each view with a meta-model defined (via "meta" property on a group or referenced view),
- * the script finds all visual elements and relationships that correspond to meta-model items 
+ * the script finds all visual elements and relationships that correspond to meta-model items
  * and copies the formatting properties:
  * - Font size
  * - Font name
@@ -43,159 +43,185 @@ var totalRelationshipsFormatted = 0;
 var elementFormattingDetails = [];
 
 // Process all views
-$("view").each(function(view) {
+$("view").each(function (view) {
   totalViews++;
   console.log("Processing view: " + view.name);
-  
+
   // Try to extract meta-model from this view
   var metaModel = extractMetaModel(view);
-  
+
   if (!metaModel) {
     console.log("  No meta-model found, skipping\n");
     return; // continue to next view
   }
-  
+
   viewsWithMeta++;
-  console.log("  Meta-model found with " + metaModel.elements.length + " element(s) and " + metaModel.relationships.length + " relationship(s)");
-  
+  console.log(
+    "  Meta-model found with " +
+      metaModel.elements.length +
+      " element(s) and " +
+      metaModel.relationships.length +
+      " relationship(s)",
+  );
+
   var elementsFormattedInView = 0;
   var relationshipsFormattedInView = 0;
-  
+
   // Process all visual elements on the view
-  $(view).find("element").each(function(visualElement) {
-    var element = visualElement.concept;
-    
-    // Find matching meta-model elements
-    var matches = findMetaModelMatches(element, metaModel);
-    
-    if (matches.length === 0) {
-      return; // No match in meta-model, skip
-    }
-    
-    // Use the first match
-    var mmElement = matches[0];
-    
-    // Get formatting from meta-model element
-    var formatting = getMetaModelFormatting(mmElement, metaModel.metaView);
-    
-    if (!formatting) {
-      console.log("    Warning: Could not get formatting for " + element.name + " (matched to " + mmElement.name + ")");
-      return;
-    }
-    
-    // Check if formatting actually has values to apply
-    var hasFormatting = formatting.fontSize !== undefined && formatting.fontSize !== null;
-    hasFormatting = hasFormatting || (formatting.fontName !== undefined && formatting.fontName !== null);
-    hasFormatting = hasFormatting || (formatting.fontStyle !== undefined && formatting.fontStyle !== null);
-    hasFormatting = hasFormatting || (formatting.textAlignment !== undefined && formatting.textAlignment !== null);
-    hasFormatting = hasFormatting || (formatting.textPosition !== undefined && formatting.textPosition !== null);
-    hasFormatting = hasFormatting || (formatting.labelExpression !== undefined && formatting.labelExpression !== null);
-    
-    if (!hasFormatting) {
-      return; // No formatting to apply
-    }
-    
-    // Apply formatting
-    applyFormatting(visualElement, formatting);
-    
-    elementsFormattedInView++;
-    totalElementsFormatted++;
-    
-    // Log details
-    var details = "    ✓ " + element.name + " ← " + mmElement.name + " (";
-    var props = [];
-    if (formatting.fontSize !== undefined && formatting.fontSize !== null) {
-      props.push("size:" + formatting.fontSize);
-    }
-    if (formatting.fontName !== undefined && formatting.fontName !== null) {
-      props.push("font:" + formatting.fontName);
-    }
-    if (formatting.fontStyle !== undefined && formatting.fontStyle !== null) {
-      props.push("style:" + formatting.fontStyle);
-    }
-    if (formatting.textAlignment !== undefined && formatting.textAlignment !== null) {
-      props.push("h-align:" + formatting.textAlignment);
-    }
-    if (formatting.textPosition !== undefined && formatting.textPosition !== null) {
-      props.push("v-align:" + formatting.textPosition);
-    }
-    if (formatting.labelExpression !== undefined && formatting.labelExpression !== null) {
-      props.push("label:" + formatting.labelExpression);
-    }
-    details += props.join(", ") + ")";
-    
-    elementFormattingDetails.push(details);
-  });
-  
+  $(view)
+    .find("element")
+    .each(function (visualElement) {
+      var element = visualElement.concept;
+
+      // Find matching meta-model elements
+      var matches = findMetaModelMatches(element, metaModel);
+
+      if (matches.length === 0) {
+        return; // No match in meta-model, skip
+      }
+
+      // Use the first match
+      var mmElement = matches[0];
+
+      // Get formatting from meta-model element
+      var formatting = getMetaModelFormatting(mmElement, metaModel.metaView);
+
+      if (!formatting) {
+        console.log(
+          "    Warning: Could not get formatting for " + element.name + " (matched to " + mmElement.name + ")",
+        );
+        return;
+      }
+
+      // Check if formatting actually has values to apply
+      var hasFormatting = formatting.fontSize !== undefined && formatting.fontSize !== null;
+      hasFormatting = hasFormatting || (formatting.fontName !== undefined && formatting.fontName !== null);
+      hasFormatting = hasFormatting || (formatting.fontStyle !== undefined && formatting.fontStyle !== null);
+      hasFormatting = hasFormatting || (formatting.textAlignment !== undefined && formatting.textAlignment !== null);
+      hasFormatting = hasFormatting || (formatting.textPosition !== undefined && formatting.textPosition !== null);
+      hasFormatting =
+        hasFormatting || (formatting.labelExpression !== undefined && formatting.labelExpression !== null);
+
+      if (!hasFormatting) {
+        return; // No formatting to apply
+      }
+
+      // Apply formatting
+      applyFormatting(visualElement, formatting);
+
+      elementsFormattedInView++;
+      totalElementsFormatted++;
+
+      // Log details
+      var details = "    ✓ " + element.name + " ← " + mmElement.name + " (";
+      var props = [];
+      if (formatting.fontSize !== undefined && formatting.fontSize !== null) {
+        props.push("size:" + formatting.fontSize);
+      }
+      if (formatting.fontName !== undefined && formatting.fontName !== null) {
+        props.push("font:" + formatting.fontName);
+      }
+      if (formatting.fontStyle !== undefined && formatting.fontStyle !== null) {
+        props.push("style:" + formatting.fontStyle);
+      }
+      if (formatting.textAlignment !== undefined && formatting.textAlignment !== null) {
+        props.push("h-align:" + formatting.textAlignment);
+      }
+      if (formatting.textPosition !== undefined && formatting.textPosition !== null) {
+        props.push("v-align:" + formatting.textPosition);
+      }
+      if (formatting.labelExpression !== undefined && formatting.labelExpression !== null) {
+        props.push("label:" + formatting.labelExpression);
+      }
+      details += props.join(", ") + ")";
+
+      elementFormattingDetails.push(details);
+    });
+
   // Process all visual relationships on the view
-  $(view).find("relationship").each(function(visualRelationship) {
-    var relationship = visualRelationship.concept;
-    
-    // Find matching meta-model relationships
-    var matches = findMetaModelRelationshipMatches(relationship, metaModel);
-    
-    if (matches.length === 0) {
-      return; // No match in meta-model, skip
-    }
-    
-    // Use the first match
-    var mmRelationship = matches[0];
-    
-    // Get formatting from meta-model relationship
-    var formatting = getMetaModelRelationshipFormatting(mmRelationship, metaModel.metaView);
-    
-    if (!formatting) {
-      console.log("    Warning: Could not get formatting for " + relationship.type + " (matched to " + mmRelationship.type + ")");
-      return;
-    }
-    
-    // Check if formatting actually has values to apply
-    var hasFormatting = formatting.fontSize !== undefined && formatting.fontSize !== null;
-    hasFormatting = hasFormatting || (formatting.fontName !== undefined && formatting.fontName !== null);
-    hasFormatting = hasFormatting || (formatting.fontStyle !== undefined && formatting.fontStyle !== null);
-    hasFormatting = hasFormatting || (formatting.textAlignment !== undefined && formatting.textAlignment !== null);
-    hasFormatting = hasFormatting || (formatting.textPosition !== undefined && formatting.textPosition !== null);
-    hasFormatting = hasFormatting || (formatting.labelExpression !== undefined && formatting.labelExpression !== null);
-    
-    if (!hasFormatting) {
-      return; // No formatting to apply
-    }
-    
-    // Apply formatting
-    applyFormatting(visualRelationship, formatting);
-    
-    relationshipsFormattedInView++;
-    totalRelationshipsFormatted++;
-    
-    // Log details
-    var relName = relationship.name || relationship.type;
-    var mmRelName = mmRelationship.name || mmRelationship.type;
-    var details = "    ✓ " + relName + " ← " + mmRelName + " (";
-    var props = [];
-    if (formatting.fontSize !== undefined && formatting.fontSize !== null) {
-      props.push("size:" + formatting.fontSize);
-    }
-    if (formatting.fontName !== undefined && formatting.fontName !== null) {
-      props.push("font:" + formatting.fontName);
-    }
-    if (formatting.fontStyle !== undefined && formatting.fontStyle !== null) {
-      props.push("style:" + formatting.fontStyle);
-    }
-    if (formatting.textAlignment !== undefined && formatting.textAlignment !== null) {
-      props.push("h-align:" + formatting.textAlignment);
-    }
-    if (formatting.textPosition !== undefined && formatting.textPosition !== null) {
-      props.push("v-align:" + formatting.textPosition);
-    }
-    if (formatting.labelExpression !== undefined && formatting.labelExpression !== null) {
-      props.push("label:" + formatting.labelExpression);
-    }
-    details += props.join(", ") + ")";
-    
-    elementFormattingDetails.push(details);
-  });
-  
-  console.log("  Formatted " + elementsFormattedInView + " element(s) and " + relationshipsFormattedInView + " relationship(s) in this view\n");
+  $(view)
+    .find("relationship")
+    .each(function (visualRelationship) {
+      var relationship = visualRelationship.concept;
+
+      // Find matching meta-model relationships
+      var matches = findMetaModelRelationshipMatches(relationship, metaModel);
+
+      if (matches.length === 0) {
+        return; // No match in meta-model, skip
+      }
+
+      // Use the first match
+      var mmRelationship = matches[0];
+
+      // Get formatting from meta-model relationship
+      var formatting = getMetaModelRelationshipFormatting(mmRelationship, metaModel.metaView);
+
+      if (!formatting) {
+        console.log(
+          "    Warning: Could not get formatting for " +
+            relationship.type +
+            " (matched to " +
+            mmRelationship.type +
+            ")",
+        );
+        return;
+      }
+
+      // Check if formatting actually has values to apply
+      var hasFormatting = formatting.fontSize !== undefined && formatting.fontSize !== null;
+      hasFormatting = hasFormatting || (formatting.fontName !== undefined && formatting.fontName !== null);
+      hasFormatting = hasFormatting || (formatting.fontStyle !== undefined && formatting.fontStyle !== null);
+      hasFormatting = hasFormatting || (formatting.textAlignment !== undefined && formatting.textAlignment !== null);
+      hasFormatting = hasFormatting || (formatting.textPosition !== undefined && formatting.textPosition !== null);
+      hasFormatting =
+        hasFormatting || (formatting.labelExpression !== undefined && formatting.labelExpression !== null);
+
+      if (!hasFormatting) {
+        return; // No formatting to apply
+      }
+
+      // Apply formatting
+      applyFormatting(visualRelationship, formatting);
+
+      relationshipsFormattedInView++;
+      totalRelationshipsFormatted++;
+
+      // Log details
+      var relName = relationship.name || relationship.type;
+      var mmRelName = mmRelationship.name || mmRelationship.type;
+      var details = "    ✓ " + relName + " ← " + mmRelName + " (";
+      var props = [];
+      if (formatting.fontSize !== undefined && formatting.fontSize !== null) {
+        props.push("size:" + formatting.fontSize);
+      }
+      if (formatting.fontName !== undefined && formatting.fontName !== null) {
+        props.push("font:" + formatting.fontName);
+      }
+      if (formatting.fontStyle !== undefined && formatting.fontStyle !== null) {
+        props.push("style:" + formatting.fontStyle);
+      }
+      if (formatting.textAlignment !== undefined && formatting.textAlignment !== null) {
+        props.push("h-align:" + formatting.textAlignment);
+      }
+      if (formatting.textPosition !== undefined && formatting.textPosition !== null) {
+        props.push("v-align:" + formatting.textPosition);
+      }
+      if (formatting.labelExpression !== undefined && formatting.labelExpression !== null) {
+        props.push("label:" + formatting.labelExpression);
+      }
+      details += props.join(", ") + ")";
+
+      elementFormattingDetails.push(details);
+    });
+
+  console.log(
+    "  Formatted " +
+      elementsFormattedInView +
+      " element(s) and " +
+      relationshipsFormattedInView +
+      " relationship(s) in this view\n",
+  );
 });
 
 // Summary
@@ -207,7 +233,7 @@ console.log("Total relationships formatted: " + totalRelationshipsFormatted);
 
 if (totalElementsFormatted > 0 || totalRelationshipsFormatted > 0) {
   console.log("\n=== Formatting Details ===");
-  elementFormattingDetails.forEach(function(detail) {
+  elementFormattingDetails.forEach(function (detail) {
     console.log(detail);
   });
 }
