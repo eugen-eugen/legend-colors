@@ -34,6 +34,11 @@ Arranges selected visual elements along the perimeter of a rectangular frame. Di
 
 **Key Features**: Square-ish frame calculation • Even distribution • Closest-match positioning • Largest-element spacing
 
+### [MetaFormatting.ajs](doc/MetaFormatting.md)
+Applies font and text formatting from meta-model elements to all matching visual elements. Copies font size, font name, font style, horizontal alignment (left/center/right), vertical alignment (top/middle/bottom), and label expressions from meta-model definitions to ensure consistent styling.
+
+**Key Features**: Meta-model based formatting • Font property copying • Horizontal & vertical alignment • Label expression support • Specialization matching • Type matching • Consistent styling
+
 ## Shared Concepts
 
 ### Kernelement Groups
@@ -50,6 +55,16 @@ Several scripts use "Kernelement" (core element) groups to identify attractor el
 
 **Used by**: `SyncViewWithModel.ajs`, `MarkIsolatedElements.ajs`
 
+### Meta-Model Support
+
+Several scripts use meta-model definitions to validate relationships or apply formatting:
+
+**Meta-model can be defined by**:
+1. A visual group with property `meta` on the view, OR
+2. A view reference pointing to another view with property `meta`
+
+**Used by**: `SyncViewWithModel.ajs`, `MetaFormatting.ajs`
+
 ### Shared Library
 
 `lib/attractors.js` - Shared attractor identification functions:
@@ -57,6 +72,13 @@ Several scripts use "Kernelement" (core element) groups to identify attractor el
 - `collectChildVisualObjectsRecursive(parent, result)` - Recursively collects children
 - `collectDirectChildVisualObjects(parent)` - Collects direct children
 - `getAttractorConcepts(attractorVisuals)` - Extracts model elements
+
+`lib/metamodel.js` - Meta-model extraction and matching functions:
+- `extractMetaModel(view)` - Extracts meta-model from view
+- `findMetaModelMatches(element, metaModel)` - Finds matching meta-model elements
+- `isRelationshipAllowed(source, target, rel, metaModel)` - Validates relationships
+- `getMetaModelFormatting(element, view)` - Extracts visual formatting properties (font, alignment, label expression)
+- `applyFormatting(visualElement, formatting)` - Applies formatting to visual elements
 
 ## Installation
 
@@ -81,7 +103,7 @@ docker pull jemojemo/archi-legend-colors:latest
 docker create --name temp-legend jemojemo/archi-legend-colors:latest
 
 # Copy scripts from container to your local folder
-docker cp temp-legend:/archi-scripts/legend-colors/ ~/path/to/your/archi/scripts/
+docker cp temp-legend:/archi-scripts/. ~/path/to/your/archi/scripts/legend-colors/
 
 # Remove temporary container
 docker rm temp-legend
@@ -103,6 +125,7 @@ Detailed documentation for each script is available in the [doc/](doc/) folder:
 - [cleanRelNames.md](doc/cleanRelNames.md)
 - [ApplyPropertyFrame.md](doc/ApplyPropertyFrame.md)
 - [ArrangeOnBorder.md](doc/ArrangeOnBorder.md)
+- [MetaFormatting.md](doc/MetaFormatting.md)
 
 Each documentation file includes:
 - **Model Elements That Matter**: Which properties, relationships, and elements affect the script
@@ -122,6 +145,7 @@ Each documentation file includes:
   - Schnittstelle properties for `cleanRelNames.ajs`
   - Temporal properties (ab/bis) for `ApplyPropertyFrame.ajs`
   - Selection of 4+ elements for `ArrangeOnBorder.ajs`
+  - Meta-model definition for `SyncViewWithModel.ajs` and `MetaFormatting.ajs`
 
 ## Author
 
