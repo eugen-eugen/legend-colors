@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-COPY *.ajs /archi-scripts/legend-colors/
-COPY lib/ /archi-scripts/legend-colors/lib/
+COPY *.ajs /archi-scripts/
+COPY lib/ /archi-scripts/lib/
 
 CMD ["/bin/sh"]
