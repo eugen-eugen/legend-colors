@@ -14,8 +14,8 @@
  */
 
 // Load libraries
-load(__DIR__ + "lib/metamodel.js");
-load(__DIR__ + "lib/utils.js");
+load(__DIR__ + "../lib/metamodel.js");
+load(__DIR__ + "../lib/utils.js");
 
 console.show();
 console.clear();

@@ -44,9 +44,9 @@
  */
 
 // Load helper libraries
-load(__DIR__ + "lib/attractors.js");
-load(__DIR__ + "lib/metamodel.js");
-load(__DIR__ + "lib/utils.js");
+load(__DIR__ + "../lib/attractors.js");
+load(__DIR__ + "../lib/metamodel.js");
+load(__DIR__ + "../lib/utils.js");
 
 /**
  * Checks if any Kernelement group in the view has debug enabled

@@ -28,8 +28,8 @@
  */
 
 // Load attractor helper functions
-load(__DIR__ + "lib/attractors.js");
-load(__DIR__ + "lib/utils.js");
+load(__DIR__ + "../lib/attractors.js");
+load(__DIR__ + "../lib/utils.js");
 
 console.show();
 console.clear();

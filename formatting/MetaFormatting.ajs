@@ -30,7 +30,7 @@
  */
 
 // Load metamodel library
-load(__DIR__ + "lib/metamodel.js");
+load(__DIR__ + "../lib/metamodel.js");
 
 console.clear();
 console.show();
