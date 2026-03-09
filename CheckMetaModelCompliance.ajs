@@ -19,7 +19,7 @@ console.log("Starting Check Meta-Model Compliance script...");
 
 function addNoteWithConnector(visual, message, view) {
   var noteX, noteY;
-  
+
   // Handle elements (have bounds) vs relationships (don't have bounds)
   if (visual.bounds) {
     noteX = visual.bounds.x + visual.bounds.width + 40;
@@ -117,7 +117,8 @@ if (metaModel) {
         nonCompliantRelationships.push(visualRel);
         var relName = rel.name || rel.type;
         var message = relName + "\n(" + rel.type + ")\nNo MM correspondence";
-        var message = relName + "\n(" + rel.type + ")\n" + rel.source.name + " → " + rel.target.name + "\nNo MM correspondence";
+        var message =
+          relName + "\n(" + rel.type + ")\n" + rel.source.name + " → " + rel.target.name + "\nNo MM correspondence";
         addNoteWithConnector(visualRel, message, view);
       }
     });
