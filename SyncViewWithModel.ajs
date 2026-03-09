@@ -24,10 +24,16 @@
  * "New Elements" group at the top-left of the view, along with their relationships
  * to the attractor elements.
  *
+ * Additionally, relationships to/from attractors are added to the view even when both
+ * connected elements are already on the view, IF:
+ * - The relationship has a correspondence in the meta-model, AND
+ * - The corresponding meta-model relationship has a label expression defined.
+ * This allows important labeled relationships to be "attracted" to views.
+ *
  * Elements with property "no-auto-sync" (with or without value) are excluded from
  * automatic synchronization.
  *
- * Views that receive new elements get a "review-" prefix in their name.
+ * Views that receive new elements or relationships get a "review-" prefix in their name.
  *
  * DEBUG: Set property "debug" with value "true" on any Kernelement visual group to enable
  *        detailed logging information in the console.
@@ -126,6 +132,22 @@ function findVisualObjectForElement(view, element) {
       }
     });
   return result;
+}
+
+/**
+ * Checks if a relationship is already visualized on the view
+ */
+function isRelationshipOnView(view, relationship) {
+  var found = false;
+  $(view)
+    .find("relationship")
+    .each(function (visualRel) {
+      if (visualRel.concept.id === relationship.id) {
+        found = true;
+        return false; // break
+      }
+    });
+  return found;
 }
 
 /**
@@ -239,75 +261,171 @@ function processView(view, debugEnabled) {
     });
   });
 
-  if (missingElements.length === 0) {
-    if (debugEnabled) {
+  if (debugEnabled) {
+    if (missingElements.length > 0) {
+      console.log("  Found " + missingElements.length + " missing element(s) to add");
+    } else {
       console.log("  No missing elements found");
     }
-    return;
   }
 
-  if (debugEnabled) {
-    console.log("  Found " + missingElements.length + " missing element(s) to add");
-  }
+  // Add missing elements to the view if any
+  var addedConnections = 0;
+  if (missingElements.length > 0) {
+    // Find or create "New Elements" group
+    var newElementsGroup = findOrCreateNewElementsGroup(view, debugEnabled);
 
-  // Find or create "New Elements" group
-  var newElementsGroup = findOrCreateNewElementsGroup(view, debugEnabled);
+    // Add missing elements to the group
+    var xOffset = 20;
+    var yOffset = 30;
+    var elementWidth = 120;
+    var elementHeight = 55;
+    var spacing = 10;
 
-  // Add missing elements to the group
-  var xOffset = 20;
-  var yOffset = 30;
-  var elementWidth = 120;
-  var elementHeight = 55;
-  var spacing = 10;
+    missingElements.forEach(function (element, index) {
+      var x = xOffset;
+      var y = yOffset + index * (elementHeight + spacing);
 
-  missingElements.forEach(function (element, index) {
-    var x = xOffset;
-    var y = yOffset + index * (elementHeight + spacing);
+      var visualElement = newElementsGroup.add(element, x, y, elementWidth, elementHeight);
+      if (debugEnabled) {
+        console.log("    Added: " + element.name + " (" + element.type + ")");
+      }
+    });
 
-    var visualElement = newElementsGroup.add(element, x, y, elementWidth, elementHeight);
+    // Adjust group size to fit all elements
+    var groupHeight = yOffset + missingElements.length * (elementHeight + spacing) + 20;
+    newElementsGroup.bounds = {
+      x: 10,
+      y: 10,
+      width: elementWidth + 2 * xOffset,
+      height: Math.max(groupHeight, 100),
+    };
+
+    // Add visual connections for the relationships
     if (debugEnabled) {
-      console.log("    Added: " + element.name + " (" + element.type + ")");
+      console.log("  Adding relationships...");
     }
+    relationshipsToAdd.forEach(function (relInfo) {
+      var relationship = relInfo.relationship;
+      var sourceElement = relationship.source;
+      var targetElement = relationship.target;
+
+      // Find visual objects for source and target
+      var sourceVisual = findVisualObjectForElement(view, sourceElement);
+      var targetVisual = findVisualObjectForElement(view, targetElement);
+
+      if (sourceVisual && targetVisual) {
+        // Add the visual connection
+        view.add(relationship, sourceVisual, targetVisual);
+        addedConnections++;
+      }
+    });
+    if (debugEnabled) {
+      console.log("  Added " + addedConnections + " relationship(s)");
+    }
+  }
+
+  // Check for relationships between existing elements (attractor connections)
+  // Only add if metamodel correspondence exists AND has a label expression
+  if (metaModel && debugEnabled) {
+    console.log("  Checking for attractor relationships between existing elements...");
+  }
+  var attractorRelationshipsToAdd = [];
+  var seenRelationships = {};
+
+  attractors.forEach(function (visualAttractor) {
+    var attractorElement = visualAttractor.concept;
+    var relatedInfo = getRelatedElementsWithRelationships(attractorElement);
+
+    relatedInfo.forEach(function (info) {
+      var relatedElement = info.element;
+      var relationship = info.relationship;
+
+      // Skip if we've already processed this relationship
+      if (seenRelationships[relationship.id]) {
+        return;
+      }
+      seenRelationships[relationship.id] = true;
+      if (debugEnabled) {
+        console.log(
+          "    Checking attractor relationship: " +
+            relationship.type +
+            " between " +
+            relationship.source.name +
+            " and " +
+            relationship.target.name,
+        );
+      }
+      // Check if both elements are already on the view
+      if (isElementOnView(view, relatedElement)) {
+        // Check if relationship is not already visualized
+        if (!isRelationshipOnView(view, relationship)) {
+          // Check if relationship is allowed by meta-model
+          if (isRelationshipAllowed(relationship.source, relationship.target, relationship, metaModel)) {
+            // If metamodel exists, check for label expression
+            var shouldAdd = false;
+            if (metaModel) {
+              var mmRelMatches = findMetaModelRelationshipMatches(relationship, metaModel);
+              for (var i = 0; i < mmRelMatches.length; i++) {
+                var formatting = getMetaModelRelationshipFormatting(mmRelMatches[i], metaModel.metaView);
+                if (formatting && formatting.labelExpression) {
+                  shouldAdd = true;
+                  if (debugEnabled) {
+                    console.log(
+                      "    Found attractor relationship with label expression: " +
+                        relationship.type +
+                        " between " +
+                        relationship.source.name +
+                        " and " +
+                        relationship.target.name +
+                        "label expression: " +
+                        formatting.labelExpression,
+                    );
+                  }
+                  break;
+                }
+              }
+            } else {
+              // No metamodel - attractor relationships require metamodel with label expressions
+              if (debugEnabled) {
+                console.log("    Skipping attractor relationship (no metamodel defined)");
+              }
+              shouldAdd = false;
+            }
+
+            if (shouldAdd) {
+              attractorRelationshipsToAdd.push(relationship);
+            }
+          }
+        }
+      }
+    });
   });
 
-  // Adjust group size to fit all elements
-  var groupHeight = yOffset + missingElements.length * (elementHeight + spacing) + 20;
-  newElementsGroup.bounds = {
-    x: 10,
-    y: 10,
-    width: elementWidth + 2 * xOffset,
-    height: Math.max(groupHeight, 100),
-  };
-
-  // Add visual connections for the relationships
-  if (debugEnabled) {
-    console.log("  Adding relationships...");
-  }
-  var addedConnections = 0;
-  relationshipsToAdd.forEach(function (relInfo) {
-    var relationship = relInfo.relationship;
-    var sourceElement = relationship.source;
-    var targetElement = relationship.target;
-
-    // Find visual objects for source and target
-    var sourceVisual = findVisualObjectForElement(view, sourceElement);
-    var targetVisual = findVisualObjectForElement(view, targetElement);
+  // Add the attractor relationships
+  var addedAttractorConnections = 0;
+  attractorRelationshipsToAdd.forEach(function (relationship) {
+    var sourceVisual = findVisualObjectForElement(view, relationship.source);
+    var targetVisual = findVisualObjectForElement(view, relationship.target);
 
     if (sourceVisual && targetVisual) {
-      // Add the visual connection
       view.add(relationship, sourceVisual, targetVisual);
-      addedConnections++;
+      addedAttractorConnections++;
     }
   });
-  if (debugEnabled) {
-    console.log("  Added " + addedConnections + " relationship(s)");
+
+  if (debugEnabled && addedAttractorConnections > 0) {
+    console.log("  Added " + addedAttractorConnections + " attractor relationship(s) between existing elements");
   }
 
   // Add "review-" prefix to view name if not already present
-  if (!view.name.startsWith("review-")) {
-    view.name = "review-" + view.name;
-    if (debugEnabled) {
-      console.log("  Renamed view to: " + view.name);
+  // (if either elements or attractor relationships were added)
+  if (missingElements.length > 0 || addedAttractorConnections > 0) {
+    if (!view.name.startsWith("review-")) {
+      view.name = "review-" + view.name;
+      if (debugEnabled) {
+        console.log("  Renamed view to: " + view.name);
+      }
     }
   }
 }

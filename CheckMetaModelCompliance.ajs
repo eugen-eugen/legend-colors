@@ -1,0 +1,142 @@
+/*
+ * Check Meta-Model Compliance
+ *
+ * This script checks if the selected view follows the meta-model (MM).
+ * - Each element must have a correspondence in the MM (across all scripts in this project).
+ * - Each relationship on the view between elements A and B must have a correspondence in the MM between the correspondences for A and B.
+ *   For all relationships except association, the direction matters.
+ * - If an element or relationship does not follow the MM, it receives a visual note with a connector.
+ *
+ * (c) Y. Moldawski, 2026
+ */
+
+// Load metamodel library
+load(__DIR__ + "lib/metamodel.js");
+
+console.show();
+console.clear();
+console.log("Starting Check Meta-Model Compliance script...");
+
+function addNoteWithConnector(visual, message, view) {
+  var noteX, noteY;
+  
+  // Handle elements (have bounds) vs relationships (don't have bounds)
+  if (visual.bounds) {
+    noteX = visual.bounds.x + visual.bounds.width + 40;
+    noteY = visual.bounds.y;
+  } else {
+    // For relationships, place note near the source element
+    if (visual.source && visual.source.bounds) {
+      noteX = visual.source.bounds.x + visual.source.bounds.width + 40;
+      noteY = visual.source.bounds.y + 50;
+    } else {
+      // Fallback position if we can't determine location
+      noteX = 10;
+      noteY = 10;
+    }
+  }
+
+  var note = view.createObject("diagram-model-note", noteX, noteY, 120, 40);
+  note.text = message;
+  note.fillColor = "#ff0000"; // Red
+  note.fontColor = "#ffffff"; // White text
+
+  var connection = view.createConnection(note, visual);
+  connection.lineColor = "#ff0000"; // Red line
+
+  return note;
+}
+
+// Get the currently selected view
+var view = selection.filter("archimate-diagram-model").first();
+
+if (!view) {
+  console.log("ERROR: No view selected. Please select a view and try again.");
+  exit();
+}
+
+console.log("Processing view: " + view.name);
+
+var metaModel = extractMetaModel(view);
+if (metaModel) {
+  // Collect meta-model element IDs that should be excluded from checking
+  var mmElementIds = {};
+  var mmGroup = null;
+
+  // Check if meta-model is defined as a group on this view
+  $(view)
+    .find("diagram-model-group")
+    .each(function (group) {
+      if (group.prop("meta") != null) {
+        mmGroup = group;
+        // Collect all elements within the meta-model group
+        $(group)
+          .find("element")
+          .each(function (visualElement) {
+            mmElementIds[visualElement.concept.id] = true;
+          });
+        return false; // break
+      }
+    });
+
+  var nonCompliantElements = [];
+  var nonCompliantRelationships = [];
+
+  // Check elements
+  $(view)
+    .find("element")
+    .each(function (visualElement) {
+      var element = visualElement.concept;
+
+      // Skip if this element is part of the meta-model group
+      if (mmElementIds[element.id]) {
+        return; // skip this element
+      }
+
+      var matches = findMetaModelMatches(element, metaModel);
+      if (matches.length === 0) {
+        nonCompliantElements.push(visualElement);
+        var message = element.name + "\n(" + element.type + ")\nNo MM correspondence";
+        addNoteWithConnector(visualElement, message, view);
+      }
+    });
+
+  // Check relationships
+  $(view)
+    .find("relationship")
+    .each(function (visualRel) {
+      var rel = visualRel.concept;
+
+      // Skip relationships within the meta-model group
+      if (mmElementIds[rel.source.id] || mmElementIds[rel.target.id]) {
+        return; // skip relationships connected to MM elements
+      }
+
+      var matches = findMetaModelRelationshipMatches(rel, metaModel);
+      if (matches.length === 0) {
+        nonCompliantRelationships.push(visualRel);
+        var relName = rel.name || rel.type;
+        var message = relName + "\n(" + rel.type + ")\nNo MM correspondence";
+        var message = relName + "\n(" + rel.type + ")\n" + rel.source.name + " → " + rel.target.name + "\nNo MM correspondence";
+        addNoteWithConnector(visualRel, message, view);
+      }
+    });
+
+  console.log("Checked view: " + view.name);
+  console.log("Non-compliant elements: " + nonCompliantElements.length);
+  console.log("Non-compliant relationships: " + nonCompliantRelationships.length);
+  if (nonCompliantElements.length > 0 || nonCompliantRelationships.length > 0) {
+    console.log("\nNon-compliance details:");
+    nonCompliantElements.forEach(function (e) {
+      console.log("  Element: " + e.concept.name);
+    });
+    nonCompliantRelationships.forEach(function (r) {
+      console.log("  Relationship: " + r.concept.name + " (" + r.concept.type + ")");
+    });
+  } else {
+    console.log("\nAll elements and relationships follow the meta-model.");
+  }
+} else {
+  console.log("ERROR: No meta-model found for this view.");
+  exit();
+}
