@@ -7,11 +7,15 @@
  *   For all relationships except association, the direction matters.
  * - If an element or relationship does not follow the MM, it receives a visual note with a connector.
  *
+ * If no view is selected, all views with meta-models are processed.
+ * Views with compliance issues are renamed with "review-" prefix.
+ *
  * (c) Y. Moldawski, 2026
  */
 
-// Load metamodel library
+// Load libraries
 load(__DIR__ + "lib/metamodel.js");
+load(__DIR__ + "lib/utils.js");
 
 console.show();
 console.clear();
@@ -47,18 +51,15 @@ function addNoteWithConnector(visual, message, view) {
   return note;
 }
 
-// Get the currently selected view
-var view = selection.filter("archimate-diagram-model").first();
+function processView(view) {
+  console.log("\nProcessing view: " + view.name);
 
-if (!view) {
-  console.log("ERROR: No view selected. Please select a view and try again.");
-  exit();
-}
+  var metaModel = extractMetaModel(view);
+  if (!metaModel) {
+    console.log("  No meta-model found, skipping");
+    return;
+  }
 
-console.log("Processing view: " + view.name);
-
-var metaModel = extractMetaModel(view);
-if (metaModel) {
   // Collect meta-model element IDs that should be excluded from checking
   var mmElementIds = {};
   var mmGroup = null;
@@ -116,28 +117,56 @@ if (metaModel) {
       if (matches.length === 0) {
         nonCompliantRelationships.push(visualRel);
         var relName = rel.name || rel.type;
-        var message = relName + "\n(" + rel.type + ")\nNo MM correspondence";
         var message =
           relName + "\n(" + rel.type + ")\n" + rel.source.name + " → " + rel.target.name + "\nNo MM correspondence";
         addNoteWithConnector(visualRel, message, view);
       }
     });
 
-  console.log("Checked view: " + view.name);
-  console.log("Non-compliant elements: " + nonCompliantElements.length);
-  console.log("Non-compliant relationships: " + nonCompliantRelationships.length);
+  console.log("  Non-compliant elements: " + nonCompliantElements.length);
+  console.log("  Non-compliant relationships: " + nonCompliantRelationships.length);
+
   if (nonCompliantElements.length > 0 || nonCompliantRelationships.length > 0) {
-    console.log("\nNon-compliance details:");
+    console.log("  Non-compliance details:");
     nonCompliantElements.forEach(function (e) {
-      console.log("  Element: " + e.concept.name);
+      console.log("    Element: " + e.concept.name);
     });
     nonCompliantRelationships.forEach(function (r) {
-      console.log("  Relationship: " + r.concept.name + " (" + r.concept.type + ")");
+      console.log("    Relationship: " + r.concept.name + " (" + r.concept.type + ")");
     });
+
+    // Mark view for review
+    if (markViewForReview(view)) {
+      console.log("  Renamed view to: " + view.name);
+    }
   } else {
-    console.log("\nAll elements and relationships follow the meta-model.");
+    console.log("  All elements and relationships follow the meta-model.");
   }
-} else {
-  console.log("ERROR: No meta-model found for this view.");
-  exit();
 }
+
+// Main execution
+var selectedView = selection.filter("archimate-diagram-model").first();
+
+if (selectedView) {
+  // Process only the selected view
+  console.log("Processing selected view...");
+  processView(selectedView);
+} else {
+  // Process all views that have a meta-model
+  console.log("No view selected. Processing all views with meta-models...");
+  var views = $("archimate-diagram-model");
+  var processedCount = 0;
+
+  views.each(function (view) {
+    var metaModel = extractMetaModel(view);
+    if (metaModel) {
+      processView(view);
+      processedCount++;
+    }
+  });
+
+  console.log("\n=== Summary ===");
+  console.log("Processed " + processedCount + " view(s) with meta-models");
+}
+
+console.log("\n=== Check Meta-Model Compliance Completed ===");

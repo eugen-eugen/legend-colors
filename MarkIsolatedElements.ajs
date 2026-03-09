@@ -21,189 +21,203 @@
  * The script recursively traverses the relationship graph from attractors to find
  * all connected elements, considering only elements that are present on the view.
  *
+ * If no view is selected, all views with Kernelement groups are processed.
+ * Views with isolated elements are renamed with "review-" prefix.
+ *
  * (c) Y. Moldawski, 2026
  */
 
 // Load attractor helper functions
 load(__DIR__ + "lib/attractors.js");
+load(__DIR__ + "lib/utils.js");
 
 console.show();
 console.clear();
 console.log("Starting Mark Isolated Elements script...");
 
-// Get the currently selected view
+function processView(view) {
+  console.log("\nProcessing view: " + view.name);
+
+  // Get attractors from the view
+  var attractorVisuals = getAttractors(view, true);
+
+  if (attractorVisuals.length === 0) {
+    console.log("  No Kernelement groups found on this view, skipping");
+    return;
+  }
+
+  console.log("  Found " + attractorVisuals.length + " attractor(s):");
+  attractorVisuals.forEach(function (visual) {
+    console.log("    - " + visual.concept.name);
+  });
+
+  // Build set of attractor element IDs for quick lookup
+  var attractorIds = {};
+  attractorVisuals.forEach(function (visual) {
+    attractorIds[visual.concept.id] = true;
+  });
+
+  // Find all archimate elements on the view (not pure visual objects like notes)
+  var allVisualElements = [];
+  var elementsOnView = {}; // Set of element IDs that are on the view
+  $(view)
+    .find("element")
+    .each(function (visual) {
+      if (visual.concept) {
+        allVisualElements.push(visual);
+        elementsOnView[visual.concept.id] = true;
+      }
+    });
+
+  console.log("  Total archimate elements on view: " + allVisualElements.length);
+
+  /**
+   * Recursively find all elements connected to attractors (directly or indirectly)
+   * Only considers elements that are on the view
+   */
+  function findConnectedElements(attractorElements, elementsOnView) {
+    var connected = {};
+    var visited = {};
+
+    function traverse(element) {
+      var elementId = element.id;
+
+      // Skip if already visited
+      if (visited[elementId]) {
+        return;
+      }
+      visited[elementId] = true;
+
+      // Only process if element is on the view
+      if (!elementsOnView[elementId]) {
+        return;
+      }
+
+      // Mark as connected
+      connected[elementId] = true;
+
+      // Traverse outgoing relationships
+      $(element)
+        .rels()
+        .each(function (rel) {
+          var target = rel.target;
+          if (!visited[target.id] && elementsOnView[target.id]) {
+            traverse(target);
+          }
+        });
+
+      // Traverse incoming relationships
+      $(element)
+        .inRels()
+        .each(function (rel) {
+          var source = rel.source;
+          if (!visited[source.id] && elementsOnView[source.id]) {
+            traverse(source);
+          }
+        });
+    }
+
+    // Start traversal from each attractor
+    attractorElements.forEach(function (attractorElement) {
+      traverse(attractorElement);
+    });
+
+    return connected;
+  }
+
+  // Get all attractor concepts
+  var attractorConcepts = [];
+  attractorVisuals.forEach(function (visual) {
+    attractorConcepts.push(visual.concept);
+  });
+
+  // Build set of all elements connected to attractors (directly or indirectly)
+  var connectedElementIds = findConnectedElements(attractorConcepts, elementsOnView);
+
+  console.log(
+    "  Found " +
+      Object.keys(connectedElementIds).length +
+      " element(s) connected to attractors (directly or indirectly)",
+  );
+
+  // Identify isolated elements
+  var isolatedVisuals = [];
+  allVisualElements.forEach(function (visual) {
+    var elementId = visual.concept.id;
+
+    // Skip if it's an attractor itself
+    if (attractorIds[elementId]) {
+      return;
+    }
+
+    // Skip if it's connected to attractors (directly or indirectly)
+    if (connectedElementIds[elementId]) {
+      return;
+    }
+
+    // This element is isolated
+    isolatedVisuals.push(visual);
+  });
+
+  console.log("  Isolated elements (no connection to attractors): " + isolatedVisuals.length);
+
+  if (isolatedVisuals.length === 0) {
+    console.log("  All elements are connected to attractors. No marking needed.");
+    return;
+  }
+
+  // Mark each isolated element with a red note
+  console.log("  Marking isolated elements...");
+
+  isolatedVisuals.forEach(function (visual) {
+    console.log("    Marking: " + visual.concept.name);
+
+    // Create a red note next to the element
+    var bounds = visual.bounds;
+    var noteX = bounds.x + bounds.width + 20; // Position to the right of the element
+    var noteY = bounds.y;
+
+    var note = view.createObject("diagram-model-note", noteX, noteY, 80, 40);
+    note.text = "Isolated";
+    note.fillColor = "#ff0000"; // Red
+    note.fontColor = "#ffffff"; // White text
+
+    // Create a visual connection from the note to the element
+    var connection = view.createConnection(note, visual);
+    connection.lineColor = "#ff0000"; // Red line
+  });
+
+  console.log("  Marked " + isolatedVisuals.length + " isolated element(s).");
+
+  // Mark view for review
+  if (markViewForReview(view)) {
+    console.log("  Renamed view to: " + view.name);
+  }
+}
+
+// Main execution
 var selectedView = selection.filter("archimate-diagram-model").first();
 
-if (!selectedView) {
-  console.log("ERROR: No view selected. Please select a view and try again.");
-  exit();
-}
+if (selectedView) {
+  // Process only the selected view
+  console.log("Processing selected view...");
+  processView(selectedView);
+} else {
+  // Process all views that have Kernelement groups
+  console.log("No view selected. Processing all views with Kernelement groups...");
+  var views = $("archimate-diagram-model");
+  var processedCount = 0;
 
-console.log("Processing view: " + selectedView.name);
-
-// Get attractors from the view
-var attractorVisuals = getAttractors(selectedView, true);
-
-if (attractorVisuals.length === 0) {
-  console.log(
-    "\nNo Kernelement groups found on this view. Cannot identify attractors.",
-  );
-  exit();
-}
-
-console.log("\nFound " + attractorVisuals.length + " attractor(s):");
-attractorVisuals.forEach(function (visual) {
-  console.log("  - " + visual.concept.name);
-});
-
-// Build set of attractor element IDs for quick lookup
-var attractorIds = {};
-attractorVisuals.forEach(function (visual) {
-  attractorIds[visual.concept.id] = true;
-});
-
-// Find all archimate elements on the view (not pure visual objects like notes)
-var allVisualElements = [];
-var elementsOnView = {}; // Set of element IDs that are on the view
-$(selectedView)
-  .find("element")
-  .each(function (visual) {
-    if (visual.concept) {
-      allVisualElements.push(visual);
-      elementsOnView[visual.concept.id] = true;
+  views.each(function (view) {
+    var attractorVisuals = getAttractors(view, true);
+    if (attractorVisuals.length > 0) {
+      processView(view);
+      processedCount++;
     }
   });
 
-console.log("\nTotal archimate elements on view: " + allVisualElements.length);
-
-/**
- * Recursively find all elements connected to attractors (directly or indirectly)
- * Only considers elements that are on the view
- */
-function findConnectedElements(attractorElements, elementsOnView) {
-  var connected = {};
-  var visited = {};
-
-  function traverse(element) {
-    var elementId = element.id;
-
-    // Skip if already visited
-    if (visited[elementId]) {
-      return;
-    }
-    visited[elementId] = true;
-
-    // Only process if element is on the view
-    if (!elementsOnView[elementId]) {
-      return;
-    }
-
-    // Mark as connected
-    connected[elementId] = true;
-
-    // Traverse outgoing relationships
-    $(element)
-      .rels()
-      .each(function (rel) {
-        var target = rel.target;
-        if (!visited[target.id] && elementsOnView[target.id]) {
-          traverse(target);
-        }
-      });
-
-    // Traverse incoming relationships
-    $(element)
-      .inRels()
-      .each(function (rel) {
-        var source = rel.source;
-        if (!visited[source.id] && elementsOnView[source.id]) {
-          traverse(source);
-        }
-      });
-  }
-
-  // Start traversal from each attractor
-  attractorElements.forEach(function (attractorElement) {
-    traverse(attractorElement);
-  });
-
-  return connected;
+  console.log("\n=== Summary ===");
+  console.log("Processed " + processedCount + " view(s) with Kernelement groups");
 }
 
-// Get all attractor concepts
-var attractorConcepts = [];
-attractorVisuals.forEach(function (visual) {
-  attractorConcepts.push(visual.concept);
-});
-
-// Build set of all elements connected to attractors (directly or indirectly)
-var connectedElementIds = findConnectedElements(
-  attractorConcepts,
-  elementsOnView,
-);
-
-console.log(
-  "\nFound " +
-    Object.keys(connectedElementIds).length +
-    " element(s) connected to attractors (directly or indirectly)",
-);
-
-// Identify isolated elements
-var isolatedVisuals = [];
-allVisualElements.forEach(function (visual) {
-  var elementId = visual.concept.id;
-
-  // Skip if it's an attractor itself
-  if (attractorIds[elementId]) {
-    return;
-  }
-
-  // Skip if it's connected to attractors (directly or indirectly)
-  if (connectedElementIds[elementId]) {
-    return;
-  }
-
-  // This element is isolated
-  isolatedVisuals.push(visual);
-});
-
-console.log(
-  "\nIsolated elements (no connection to attractors): " +
-    isolatedVisuals.length,
-);
-
-if (isolatedVisuals.length === 0) {
-  console.log("\nAll elements are connected to attractors. No marking needed.");
-  exit();
-}
-
-// Mark each isolated element with a red note
-console.log("\nMarking isolated elements...");
-
-isolatedVisuals.forEach(function (visual) {
-  console.log("  Marking: " + visual.concept.name);
-
-  // Create a red note next to the element
-  var bounds = visual.bounds;
-  var noteX = bounds.x + bounds.width + 20; // Position to the right of the element
-  var noteY = bounds.y;
-
-  var note = selectedView.createObject(
-    "diagram-model-note",
-    noteX,
-    noteY,
-    80,
-    40,
-  );
-  note.text = "Isolated";
-  note.fillColor = "#ff0000"; // Red
-  note.fontColor = "#ffffff"; // White text
-
-  // Create a visual connection from the note to the element
-  var connection = selectedView.createConnection(note, visual);
-  connection.lineColor = "#ff0000"; // Red line
-});
-
-console.log(
-  "\nDone! Marked " + isolatedVisuals.length + " isolated element(s).",
-);
+console.log("\n=== Mark Isolated Elements Completed ===");
