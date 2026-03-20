@@ -128,7 +128,7 @@ The script provides detailed logging:
 
 ## Script Location
 
-`legend-colors/review/RelAggregator.ajs`
+`legend-colors/formatting/RelAggregator.ajs`
 
 ## Author
 

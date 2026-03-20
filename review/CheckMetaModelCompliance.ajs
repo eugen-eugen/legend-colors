@@ -21,36 +21,6 @@ console.show();
 console.clear();
 console.log("Starting Check Meta-Model Compliance script...");
 
-function addNoteWithConnector(visual, message, view) {
-  var noteX, noteY;
-
-  // Handle elements (have bounds) vs relationships (don't have bounds)
-  if (visual.bounds) {
-    noteX = visual.bounds.x + visual.bounds.width + 40;
-    noteY = visual.bounds.y;
-  } else {
-    // For relationships, place note near the source element
-    if (visual.source && visual.source.bounds) {
-      noteX = visual.source.bounds.x + visual.source.bounds.width + 40;
-      noteY = visual.source.bounds.y + 50;
-    } else {
-      // Fallback position if we can't determine location
-      noteX = 10;
-      noteY = 10;
-    }
-  }
-
-  var note = view.createObject("diagram-model-note", noteX, noteY, 120, 40);
-  note.text = message;
-  note.fillColor = "#ff0000"; // Red
-  note.fontColor = "#ffffff"; // White text
-
-  var connection = view.createConnection(note, visual);
-  connection.lineColor = "#ff0000"; // Red line
-
-  return note;
-}
-
 function processView(view) {
   console.log("\nProcessing view: " + view.name);
 
@@ -98,7 +68,12 @@ function processView(view) {
       if (matches.length === 0) {
         nonCompliantElements.push(visualElement);
         var message = element.name + "\n(" + element.type + ")\nNo MM correspondence";
-        addNoteWithConnector(visualElement, message, view);
+        createNoteForVisual(visualElement, message, view, {
+          fillColor: "#ff0000",
+          fontColor: "#ffffff",
+          width: 120,
+          height: 40
+        });
       }
     });
 
@@ -119,7 +94,12 @@ function processView(view) {
         var relName = rel.name || rel.type;
         var message =
           relName + "\n(" + rel.type + ")\n" + rel.source.name + " → " + rel.target.name + "\nNo MM correspondence";
-        addNoteWithConnector(visualRel, message, view);
+        createNoteForVisual(visualRel, message, view, {
+          fillColor: "#ff0000",
+          fontColor: "#ffffff",
+          width: 120,
+          height: 40
+        });
       }
     });
 

@@ -29,6 +29,8 @@
  * - The relationship has a correspondence in the meta-model, AND
  * - The corresponding meta-model relationship has a label expression defined.
  * This allows important labeled relationships to be "attracted" to views.
+ * When such relationships are added, an orange "Added" note is created near the
+ * connection midpoint to mark it for review.
  *
  * Elements with property "no-auto-sync" (with or without value) are excluded from
  * automatic synchronization.
@@ -410,13 +412,21 @@ function processView(view, debugEnabled) {
     var targetVisual = findVisualObjectForElement(view, relationship.target);
 
     if (sourceVisual && targetVisual) {
-      view.add(relationship, sourceVisual, targetVisual);
+      var visualRelationship = view.add(relationship, sourceVisual, targetVisual);
       addedAttractorConnections++;
+
+      // Create a note to mark this added connection
+      createNoteForRelationship(visualRelationship, sourceVisual, targetVisual, "Added", view, {
+        fillColor: "#FFA500",  // Orange
+        fontColor: "#000000",  // Black text
+        width: 100,
+        height: 40
+      });
     }
   });
 
   if (debugEnabled && addedAttractorConnections > 0) {
-    console.log("  Added " + addedAttractorConnections + " attractor relationship(s) between existing elements");
+    console.log("  Added " + addedAttractorConnections + " attractor relationship(s) between existing elements with orange 'Added' notes");
   }
 
   // Add "review-" prefix to view name if not already present

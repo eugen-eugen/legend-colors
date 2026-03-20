@@ -4,6 +4,15 @@
 
 Keeps views in sync with the model by automatically adding newly related elements to views. Only elements marked as "Kernelement" (core elements) attract new related elements. New elements are added to a "New Elements" group, and the view name is prefixed with "review-" for easy identification.
 
+## Visual Markers
+
+When the script adds attractor relationships between existing elements on the view (relationships that weren't previously visualized):
+- An **orange note** labeled "Added" is created near the relationship's midpoint
+- The note is connected to one of the relationship's endpoints with an **orange line**
+- This provides visual feedback about which connections were automatically added
+
+**Note**: Only relationships that have a label expression defined in the meta-model will be added as attractor relationships.
+
 ## Model Elements That Matter
 
 ### Visual Groups (on Views)
@@ -117,6 +126,10 @@ Meta-models define which relationships are allowed between which types of elemen
    - Creates/finds "New Elements" group
    - Adds missing elements to group (stacked vertically)
    - Adds visual connections for relationships
+   - For attractor relationships between existing elements (when meta-model has label expressions):
+     - Adds the relationship connection
+     - Creates an orange "Added" note near the connection midpoint
+     - Connects the note to the target element with an orange line
    - Prefixes view name with "review-"
 
 ### Kernelement: Direct vs Recursive

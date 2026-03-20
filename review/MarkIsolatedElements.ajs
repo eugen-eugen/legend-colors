@@ -173,18 +173,13 @@ function processView(view) {
     console.log("    Marking: " + visual.concept.name);
 
     // Create a red note next to the element
-    var bounds = visual.bounds;
-    var noteX = bounds.x + bounds.width + 20; // Position to the right of the element
-    var noteY = bounds.y;
-
-    var note = view.createObject("diagram-model-note", noteX, noteY, 80, 40);
-    note.text = "Isolated";
-    note.fillColor = "#ff0000"; // Red
-    note.fontColor = "#ffffff"; // White text
-
-    // Create a visual connection from the note to the element
-    var connection = view.createConnection(note, visual);
-    connection.lineColor = "#ff0000"; // Red line
+    createNoteForVisual(visual, "Isolated", view, {
+      fillColor: "#ff0000",
+      fontColor: "#ffffff",
+      width: 80,
+      height: 40,
+      offsetX: -20  // Adjust to match original positioning
+    });
   });
 
   console.log("  Marked " + isolatedVisuals.length + " isolated element(s).");

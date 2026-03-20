@@ -67,10 +67,7 @@ function findSubComponents(element, visited) {
   $(element)
     .rels()
     .each(function (rel) {
-      if (
-        rel.type === "composition-relationship" ||
-        rel.type === "aggregation-relationship"
-      ) {
+      if (rel.type === "composition-relationship" || rel.type === "aggregation-relationship") {
         var target = rel.target;
         subs.push(target);
         // Recursively find sub-components of this target
@@ -157,7 +154,7 @@ function processAggregator(aggregator) {
               " from " +
               rel.source.name +
               " → " +
-              rel.target.name
+              rel.target.name,
           );
         }
       });
@@ -179,7 +176,7 @@ function processAggregator(aggregator) {
             " from " +
             rel.source.name +
             " → " +
-            rel.target.name
+            rel.target.name,
         );
       }
     });
@@ -201,7 +198,7 @@ function processAggregator(aggregator) {
               " from " +
               rel.source.name +
               " → " +
-              rel.target.name
+              rel.target.name,
           );
         }
       });
@@ -292,7 +289,7 @@ if (aggregators.length === 0) {
   console.log("\nNo aggregator relationships found.");
 } else {
   console.log("\nFound " + aggregators.length + " aggregator relationship(s) to process.");
-  
+
   aggregators.forEach(function (aggregator) {
     processAggregator(aggregator);
   });
