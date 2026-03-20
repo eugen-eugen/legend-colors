@@ -417,16 +417,20 @@ function processView(view, debugEnabled) {
 
       // Create a note to mark this added connection
       createNoteForRelationship(visualRelationship, sourceVisual, targetVisual, "Added", view, {
-        fillColor: "#FFA500",  // Orange
-        fontColor: "#000000",  // Black text
+        fillColor: "#FFA500", // Orange
+        fontColor: "#000000", // Black text
         width: 100,
-        height: 40
+        height: 40,
       });
     }
   });
 
   if (debugEnabled && addedAttractorConnections > 0) {
-    console.log("  Added " + addedAttractorConnections + " attractor relationship(s) between existing elements with orange 'Added' notes");
+    console.log(
+      "  Added " +
+        addedAttractorConnections +
+        " attractor relationship(s) between existing elements with orange 'Added' notes",
+    );
   }
 
   // Add "review-" prefix to view name if not already present
