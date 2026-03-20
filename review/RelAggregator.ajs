@@ -1,0 +1,301 @@
+/*
+ * Relationship Aggregator
+ *
+ * This script aggregates properties from sub-component relationships to their parent
+ * aggregator relationships.
+ *
+ * The script processes relationships marked with an "aggregator" property. For each such
+ * relationship, it:
+ * 1. Finds all sub-components of both the source and target elements (recursively,
+ *    following composition and aggregation relationships)
+ * 2. Identifies relationships that match the aggregator's type/specialization in three scenarios:
+ *    - Between sub-components: source's sub → target's sub
+ *    - From aggregator source to target's sub: source → target's sub
+ *    - From source's sub to aggregator target: source's sub → target
+ * 3. Copies all properties from matching relationships to the aggregator
+ * 4. Removes all other properties from the aggregator (except "aggregator" itself)
+ *
+ * Matching criteria:
+ * - A relationship matches if:
+ *   - It has the same specialization as the aggregator (if both have one), OR
+ *   - It has the same ArchiMate type as the aggregator (if neither has specialization)
+ * - The source/target roles must correspond: if the aggregator goes from A to B,
+ *   the matching relationship must go from A or A's sub to B or B's sub
+ *   (not the reverse direction)
+ *
+ * Usage:
+ * - Select one or more relationships: only selected relationships with "aggregator"
+ *   property will be processed
+ * - No selection: all relationships in the model with "aggregator" property will be processed
+ *
+ * Example:
+ * Application component A has a "trigger" relationship to B, marked with property "aggregator".
+ * A contains sub-component A1 (via composition), B contains B1 (via aggregation).
+ * A1 has a "trigger" relationship to B1 with property "Hello=World".
+ * A has a "trigger" relationship to B1 with property "Interface=REST".
+ * Result: The aggregator relationship A→B will get both properties "Hello=World" and "Interface=REST".
+ * Note: If B1 triggers A1 or B triggers A1 (reverse direction), they will NOT match because
+ * the roles don't correspond.
+ *
+ * (c) Y. Moldawski, 2026
+ */
+
+console.show();
+console.clear();
+console.log("Starting Relationship Aggregator script...");
+
+/**
+ * Recursively finds all sub-components of an element via composition and aggregation.
+ * Uses cycle detection to prevent infinite loops.
+ * @param {Element} element - The element to find sub-components for
+ * @param {Object} visited - Set of already visited element IDs (for cycle detection)
+ * @returns {Array} Array of sub-component elements
+ */
+function findSubComponents(element, visited) {
+  if (!visited) {
+    visited = {};
+  }
+
+  if (visited[element.id]) {
+    return []; // Already visited, break recursion
+  }
+
+  visited[element.id] = true;
+  var subs = [];
+
+  // Find all outgoing composition and aggregation relationships
+  $(element)
+    .rels()
+    .each(function (rel) {
+      if (
+        rel.type === "composition-relationship" ||
+        rel.type === "aggregation-relationship"
+      ) {
+        var target = rel.target;
+        subs.push(target);
+        // Recursively find sub-components of this target
+        var nestedSubs = findSubComponents(target, visited);
+        nestedSubs.forEach(function (nestedSub) {
+          if (subs.indexOf(nestedSub) === -1) {
+            subs.push(nestedSub);
+          }
+        });
+      }
+    });
+
+  return subs;
+}
+
+/**
+ * Checks if a relationship matches the aggregator relationship.
+ * Matching means:
+ * - Same specialization (if both have one), OR
+ * - Same ArchiMate type (if neither has specialization)
+ * @param {Relationship} rel - The relationship to check
+ * @param {Relationship} aggregator - The aggregator relationship
+ * @returns {boolean} True if the relationship matches
+ */
+function matchesAggregator(rel, aggregator) {
+  var relSpec = rel.specialization;
+  var aggSpec = aggregator.specialization;
+
+  if (relSpec != null && aggSpec != null) {
+    // Both have specialization: must match
+    return relSpec === aggSpec;
+  } else if (relSpec == null && aggSpec == null) {
+    // Neither has specialization: type must match
+    return rel.type === aggregator.type;
+  } else {
+    // One has specialization, the other doesn't: no match
+    return false;
+  }
+}
+
+/**
+ * Processes a single aggregator relationship.
+ * @param {Relationship} aggregator - The aggregator relationship to process
+ */
+function processAggregator(aggregator) {
+  console.log("\nProcessing aggregator: " + aggregator.name + " (" + aggregator.type + ")");
+  console.log("  From: " + aggregator.source.name + " → To: " + aggregator.target.name);
+
+  // Find sub-components of source and target
+  var sourceSubs = findSubComponents(aggregator.source, {});
+  var targetSubs = findSubComponents(aggregator.target, {});
+
+  console.log("  Found " + sourceSubs.length + " sub-component(s) of source");
+  console.log("  Found " + targetSubs.length + " sub-component(s) of target");
+
+  // Find matching relationships between sub-components
+  var matchingRels = [];
+  var sourceSubIds = {};
+  var targetSubIds = {};
+
+  // Build lookup sets for efficiency
+  sourceSubs.forEach(function (sub) {
+    sourceSubIds[sub.id] = true;
+  });
+  targetSubs.forEach(function (sub) {
+    targetSubIds[sub.id] = true;
+  });
+
+  // Case 1: Relationships from source sub-components to target sub-components (A1 → B1)
+  sourceSubs.forEach(function (sourceSub) {
+    $(sourceSub)
+      .rels()
+      .each(function (rel) {
+        // Check if target is a target sub-component and relationship matches
+        if (targetSubIds[rel.target.id] && matchesAggregator(rel, aggregator)) {
+          matchingRels.push(rel);
+          console.log(
+            "    Found match (sub→sub): " +
+              rel.name +
+              " (" +
+              rel.type +
+              ")" +
+              (rel.specialization ? " [" + rel.specialization + "]" : "") +
+              " from " +
+              rel.source.name +
+              " → " +
+              rel.target.name
+          );
+        }
+      });
+  });
+
+  // Case 2: Relationships from aggregator source to target sub-components (A → B1)
+  $(aggregator.source)
+    .rels()
+    .each(function (rel) {
+      if (targetSubIds[rel.target.id] && matchesAggregator(rel, aggregator)) {
+        matchingRels.push(rel);
+        console.log(
+          "    Found match (source→sub): " +
+            rel.name +
+            " (" +
+            rel.type +
+            ")" +
+            (rel.specialization ? " [" + rel.specialization + "]" : "") +
+            " from " +
+            rel.source.name +
+            " → " +
+            rel.target.name
+        );
+      }
+    });
+
+  // Case 3: Relationships from source sub-components to aggregator target (A1 → B)
+  sourceSubs.forEach(function (sourceSub) {
+    $(sourceSub)
+      .rels()
+      .each(function (rel) {
+        if (rel.target.id === aggregator.target.id && matchesAggregator(rel, aggregator)) {
+          matchingRels.push(rel);
+          console.log(
+            "    Found match (sub→target): " +
+              rel.name +
+              " (" +
+              rel.type +
+              ")" +
+              (rel.specialization ? " [" + rel.specialization + "]" : "") +
+              " from " +
+              rel.source.name +
+              " → " +
+              rel.target.name
+          );
+        }
+      });
+  });
+
+  console.log("  Found " + matchingRels.length + " matching sub-relationship(s)");
+
+  // Collect all properties from matching relationships
+  var propertiesToCopy = {};
+  matchingRels.forEach(function (rel) {
+    var propKeys = rel.prop();
+    if (propKeys && propKeys.length > 0) {
+      propKeys.forEach(function (key) {
+        // Get all values for this property (in case of duplicates)
+        var values = rel.prop(key, true);
+        if (!propertiesToCopy[key]) {
+          propertiesToCopy[key] = [];
+        }
+        // Add all values, avoiding duplicates
+        values.forEach(function (value) {
+          if (propertiesToCopy[key].indexOf(value) === -1) {
+            propertiesToCopy[key].push(value);
+          }
+        });
+      });
+    }
+  });
+
+  // Remove all properties from aggregator except "aggregator"
+  var existingProps = aggregator.prop();
+  if (existingProps && existingProps.length > 0) {
+    existingProps.forEach(function (key) {
+      if (key !== "aggregator") {
+        var values = aggregator.prop(key, true);
+        values.forEach(function (value) {
+          aggregator.removeProp(key);
+        });
+      }
+    });
+  }
+
+  // Copy properties to aggregator
+  var copiedCount = 0;
+  for (var key in propertiesToCopy) {
+    if (propertiesToCopy.hasOwnProperty(key)) {
+      propertiesToCopy[key].forEach(function (value) {
+        aggregator.prop(key, value);
+        copiedCount++;
+        console.log("    Copied property: " + key + " = " + value);
+      });
+    }
+  }
+
+  if (copiedCount === 0) {
+    console.log("  No properties to copy");
+  } else {
+    console.log("  Total properties copied: " + copiedCount);
+  }
+}
+
+// Main execution
+var aggregators = [];
+
+// Check if there are selected relationships
+var selectedRels = $(selection).filter("relationship");
+
+if (selectedRels.length > 0) {
+  console.log("Processing " + selectedRels.length + " selected relationship(s)...");
+  selectedRels.each(function (rel) {
+    if (rel.prop("aggregator") != null) {
+      aggregators.push(rel);
+    }
+  });
+  if (aggregators.length === 0) {
+    console.log("Warning: None of the selected relationships have an 'aggregator' property");
+  }
+} else {
+  // No selection: process all relationships with "aggregator" property
+  console.log("No selection. Processing all relationships with 'aggregator' property...");
+  $("relationship").each(function (rel) {
+    if (rel.prop("aggregator") != null) {
+      aggregators.push(rel);
+    }
+  });
+}
+
+if (aggregators.length === 0) {
+  console.log("\nNo aggregator relationships found.");
+} else {
+  console.log("\nFound " + aggregators.length + " aggregator relationship(s) to process.");
+  
+  aggregators.forEach(function (aggregator) {
+    processAggregator(aggregator);
+  });
+
+  console.log("\n=== Processing complete ===");
+}
