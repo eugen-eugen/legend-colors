@@ -39,10 +39,7 @@ legendViews.each(function (view) {
 
       // Only store colors if we haven't seen this element yet (first legend view wins)
       // Store if at least one color is defined
-      if (
-        !elementColors[elementId] &&
-        (fillColor || fontColor || lineColor || iconColor)
-      ) {
+      if (!elementColors[elementId] && (fillColor || fontColor || lineColor || iconColor)) {
         elementColors[elementId] = {
           fillColor: fillColor,
           fontColor: fontColor,
@@ -56,12 +53,7 @@ legendViews.each(function (view) {
         if (lineColor) colorInfo.push("line=" + lineColor);
         if (iconColor) colorInfo.push("icon=" + iconColor);
 
-        console.log(
-          "  - Stored colors (" +
-            colorInfo.join(", ") +
-            ") for element: " +
-            visualElement.concept.name,
-        );
+        console.log("  - Stored colors (" + colorInfo.join(", ") + ") for element: " + visualElement.concept.name);
 
         // Apply colors recursively to aggregated and composed elements
         var element = visualElement.concept;
@@ -91,19 +83,14 @@ function applyColorRecursively(element, colors, visited, depth) {
     .each(function (rel) {
       var relType = rel.type;
 
-      if (
-        relType === "aggregation-relationship" ||
-        relType === "composition-relationship"
-      ) {
+      if (relType === "aggregation-relationship" || relType === "composition-relationship") {
         var targetElement = rel.target;
         var targetId = targetElement.id;
 
         // Apply the same colors to the part/target element (if not already set)
         if (!elementColors[targetId]) {
           elementColors[targetId] = colors;
-          console.log(
-            indent + "-> Part (" + relType + "): " + targetElement.name,
-          );
+          console.log(indent + "-> Part (" + relType + "): " + targetElement.name);
 
           // Recursively process this part
           applyColorRecursively(targetElement, colors, visited, depth + 1);
@@ -145,10 +132,6 @@ if (colorCount === 0) {
       });
   });
 
-  console.log(
-    "\nApplied colors to " +
-      appliedCount +
-      " visual element(s) across non-legend views",
-  );
+  console.log("\nApplied colors to " + appliedCount + " visual element(s) across non-legend views");
   console.log("Done!");
 }
