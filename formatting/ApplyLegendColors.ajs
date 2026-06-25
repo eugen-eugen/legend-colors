@@ -4,8 +4,7 @@
  * This script finds all views with property "legend"="y" and applies the fill, text, line, and icon colors
  * of elements on these legend views to the same elements on all other views.
  *
- * Additionally, it applies colors to parts of aggregated/composed elements (top-down)
- * and to associated elements (outgoing only) with the legend elements.
+ * Additionally, it applies colors to parts of aggregated/composed elements (top-down).
  *
  * If an element appears on multiple legend views, the colors from the first legend view are used.
  *
@@ -108,15 +107,6 @@ function applyColorRecursively(element, colors, visited, depth) {
 
           // Recursively process this part
           applyColorRecursively(targetElement, colors, visited, depth + 1);
-        }
-      } else if (relType === "association-relationship") {
-        var targetElement = rel.target;
-        var targetId = targetElement.id;
-
-        // Apply colors to associated elements (but don't recurse)
-        if (!elementColors[targetId]) {
-          elementColors[targetId] = colors;
-          console.log(indent + "-> Associated: " + targetElement.name);
         }
       }
     });

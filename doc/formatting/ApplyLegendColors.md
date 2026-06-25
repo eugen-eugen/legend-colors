@@ -2,7 +2,7 @@
 
 ## Overview
 
-Automatically propagates colors from designated "legend" views to all instances of the same elements throughout your Archi model. Colors are applied recursively through aggregation and composition relationships (top-down) and to associated elements (non-recursive).
+Automatically propagates colors from designated "legend" views to all instances of the same elements throughout your Archi model. Colors are applied recursively through aggregation and composition relationships (top-down).
 
 ## Model Elements That Matter
 
@@ -33,11 +33,9 @@ The script follows these relationships **from source elements on legend views**:
 |------------------|-----------|-----------|---------|
 | Aggregation | Outgoing (source → target) | **Yes** | Colors all parts/children |
 | Composition | Outgoing (source → target) | **Yes** | Colors all components |
-| Association | Outgoing (source → target) | **No** | Colors directly associated elements only |
 
 **Important Notes**:
 - Aggregation/Composition: Colors flow **top-down** from aggregate/composite to parts recursively
-- Association: Colors applied to targets, but does NOT recurse further
 - Cycle detection prevents infinite loops in circular relationship structures
 
 ## Usage
@@ -71,8 +69,7 @@ The script follows these relationships **from source elements on legend views**:
    - Stores fill, text, line, and icon colors
    - **First-wins logic**: If element appears on multiple legend views, first colors found are used
 3. **Follow Relationships**: From each legend element:
-   - Recursively follows aggregation/composition (top-down)
-   - Applies colors to associated elements (outgoing only, non-recursive)
+  - Recursively follows aggregation/composition (top-down)
 4. **Apply Colors**: Updates all visual representations across all non-legend views
 5. **Preserve Legends**: Legend views themselves are skipped during application to preserve original coloring
 
@@ -97,18 +94,6 @@ Result:
 - Database: Green (from legend)
 - Table: Yellow (from legend, via recursive traversal)
 - API Module: Blue (inherited from Service Component)
-```
-
-**Association Example**:
-```
-UI Component [Legend: Purple]
-├── associated with → Backend Service
-│   └── aggregates → Database
-
-Result:
-- UI Component: Purple (from legend)
-- Backend Service: Purple (inherited via association)
-- Database: NOT colored (association doesn't recurse)
 ```
 
 ## Example Scenarios
@@ -203,7 +188,7 @@ Done! Colored 47 element instance(s) across 8 view(s).
 ### Partial Coloring
 
 **Possible causes**:
-1. Association relationships don't recurse
+1. No aggregation/composition path exists from legend elements
 2. Relationships point in wrong direction for aggregation/composition
 3. Element on non-legend view has different ID than legend element
 

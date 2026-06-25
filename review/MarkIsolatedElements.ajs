@@ -17,12 +17,14 @@
  * - If it has any connection path (direct or indirect, via other elements) to any
  *   attractor, skip it
  * - Otherwise, create a red note labeled "Isolated" and connect it to the element
+ * - All existing notes on the view are removed before the check to ensure clean results.
  *
  * The script recursively traverses the relationship graph from attractors to find
  * all connected elements, considering only elements that are present on the view.
  *
  * If no view is selected, all views with Kernelement groups are processed.
  * Views with isolated elements are renamed with "review-" prefix.
+ * Views with no isolated elements have the "review-" prefix removed (if present).
  *
  * (c) Y. Moldawski, 2026
  */
@@ -49,6 +51,33 @@ function processView(view) {
   console.log("  Found " + attractorVisuals.length + " attractor(s):");
   attractorVisuals.forEach(function (visual) {
     console.log("    - " + visual.concept.name);
+  });
+
+  // Remove all existing notes from previous runs
+  var notesToRemove = [];
+  var connectionsToRemove = [];
+  
+  $(view)
+    .find("diagram-model-note")
+    .each(function (note) {
+      // Collect all connections from this note
+      $(note)
+        .outRels()
+        .each(function (connection) {
+          connectionsToRemove.push(connection);
+        });
+      notesToRemove.push(note);
+    });
+
+  // Remove connections first, then notes
+  console.log("  Removing " + connectionsToRemove.length + " existing note connection(s)");
+  connectionsToRemove.forEach(function (connection) {
+    connection.delete();
+  });
+  
+  console.log("  Removing " + notesToRemove.length + " existing note(s)");
+  notesToRemove.forEach(function (note) {
+    note.delete();
   });
 
   // Build set of attractor element IDs for quick lookup
@@ -163,6 +192,12 @@ function processView(view) {
 
   if (isolatedVisuals.length === 0) {
     console.log("  All elements are connected to attractors. No marking needed.");
+    
+    // Remove review prefix if view now passes all checks
+    if (unmarkViewForReview(view)) {
+      console.log("  Removed 'review-' prefix, renamed to: " + view.name);
+    }
+    
     return;
   }
 

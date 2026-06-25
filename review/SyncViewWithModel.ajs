@@ -36,6 +36,7 @@
  * automatic synchronization.
  *
  * Views that receive new elements or relationships get a "review-" prefix in their name.
+ * Views with no additions have the "review-" prefix removed (if present).
  *
  * DEBUG: Set property "debug" with value "true" on any Kernelement visual group to enable
  *        detailed logging information in the console.
@@ -439,6 +440,13 @@ function processView(view, debugEnabled) {
     if (markViewForReview(view)) {
       if (debugEnabled) {
         console.log("  Renamed view to: " + view.name);
+      }
+    }
+  } else {
+    // Remove review prefix if view is now complete (no elements or relationships added)
+    if (unmarkViewForReview(view)) {
+      if (debugEnabled) {
+        console.log("  Removed 'review-' prefix, renamed to: " + view.name);
       }
     }
   }
