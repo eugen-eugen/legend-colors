@@ -47,9 +47,22 @@
  */
 
 // Load helper libraries
-load(__DIR__ + "../lib/attractors.js");
-load(__DIR__ + "../lib/metamodel.js");
-load(__DIR__ + "../lib/utils.js");
+const { getAttractors, getAttractorConcepts } = require("../lib/attractors.js");
+const {
+  extractMetaModel,
+  findMetaModelMatches,
+  findMetaModelRelationshipMatches,
+  isRelationshipAllowed,
+  getMetaModelFormatting,
+  getMetaModelRelationshipFormatting,
+  applyFormatting,
+} = require("@eugen-eugen/archi-metamodel");
+const {
+  markViewForReview,
+  unmarkViewForReview,
+  createNoteForVisual,
+  createNoteForRelationship,
+} = require("../lib/utils.js");
 
 /**
  * Checks if any Kernelement group in the view has debug enabled

@@ -16,9 +16,22 @@
  * (c) Y. Moldawski, 2026
  */
 
-// Load libraries
-load(__DIR__ + "../lib/metamodel.js");
-load(__DIR__ + "../lib/utils.js");
+// Libraries (metamodel bundled from @eugen-eugen/archi-metamodel at build time)
+const {
+  extractMetaModel,
+  findMetaModelMatches,
+  findMetaModelRelationshipMatches,
+  isRelationshipAllowed,
+  getMetaModelFormatting,
+  getMetaModelRelationshipFormatting,
+  applyFormatting,
+} = require("@eugen-eugen/archi-metamodel");
+const {
+  markViewForReview,
+  unmarkViewForReview,
+  createNoteForVisual,
+  createNoteForRelationship,
+} = require("../lib/utils.js");
 
 console.show();
 console.clear();
@@ -36,7 +49,7 @@ function processView(view) {
   // Remove all existing compliance notes from previous runs
   var notesToRemove = [];
   var connectionsToRemove = [];
-  
+
   $(view)
     .find("diagram-model-note")
     .each(function (note) {
@@ -54,7 +67,7 @@ function processView(view) {
   connectionsToRemove.forEach(function (connection) {
     connection.delete();
   });
-  
+
   console.log("  Removing " + notesToRemove.length + " existing note(s)");
   notesToRemove.forEach(function (note) {
     note.delete();
@@ -156,7 +169,7 @@ function processView(view) {
     }
   } else {
     console.log("  All elements and relationships follow the meta-model.");
-    
+
     // Remove review prefix if view now passes all checks
     if (unmarkViewForReview(view)) {
       console.log("  Removed 'review-' prefix, renamed to: " + view.name);

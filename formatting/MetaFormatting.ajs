@@ -29,8 +29,16 @@
  * (c) Y. Moldawski, 2026
  */
 
-// Load metamodel library
-load(__DIR__ + "../lib/metamodel.js");
+// Meta-model library (bundled from @eugen-eugen/archi-metamodel at build time)
+const {
+  extractMetaModel,
+  findMetaModelMatches,
+  findMetaModelRelationshipMatches,
+  isRelationshipAllowed,
+  getMetaModelFormatting,
+  getMetaModelRelationshipFormatting,
+  applyFormatting,
+} = require("@eugen-eugen/archi-metamodel");
 
 console.clear();
 console.show();
